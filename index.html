@@ -6,8 +6,21 @@
         background-color: black;
     }
 
+    .fa:hover{
+        color:rgb(2, 57, 139) !important;
+    }
+    
+    .fa-github:hover{
+        color: rgb(6, 43, 112) !important;
+    }
+
+    /* .Theatina:hover {
+        color:rgb(216, 61, 61) !important ;
+    } */
+
+
     #text {
-        color: #0466c8;
+        color:rgb(71, 149, 238);
         font-size: 50px;
         font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
         white-space: nowrap;
@@ -18,6 +31,8 @@
         line-height: 0.1em;
         margin: 10px 0 20px; 
     }
+
+
 
     .button-class {
         background-color: slategrey;
@@ -37,11 +52,29 @@
         margin-top: -100px;
         margin-left: -200px;
     }
-
-    .a:hover{
-        color:teal;
+    
+    .popup {
+        zoom:1.0;
+        position:relative;
+        text-decoration:none;
     }
+    .popup span {
+        position:fixed;
+        top:170px;
+        left:500px;
+        width:350px;
+        padding:0px;
+        border:10px solid #000;
+        border-radius:50%;
+        left:-999em;
+        z-index:990;
+            
+    }
+    .popup:hover {visibility:visible}
+    .popup:hover span {left:350px;}
+    * html .popup span {position:absolute;}
 
+    
 
 </style>
 
@@ -55,14 +88,16 @@
     <div>
         <p id="text" style="text-align:center;">
 
-            <a href="https://github.com/theatina"><i class="fa fa-github" style="font-size:70px;color:midnightblue"></i></a>
+            <a href="https://github.com/theatina"><i class="fa fa-github" style="font-size:70px;color: rgb(12, 81, 172);"></i></a>
             
-            <br><br><br><br><br><br><br><br><br><br><br>
+            <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 
-            <b>I'm Theatina Kylafi</b>
+            <a  class="Theatina popup"><b>I'm Theatina Kylafi</b></a>
             
-            <br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-
+            <!-- <a class="popup" href="#">I'm Theatina Kylafi<span><img src="./tina.jpg"></span></a> -->
+            
+            <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+            
             <a href="https://www.facebook.com/theatina/" style="margin-right:1em"><i class="fa fa-facebook" style="font-size:48px;color:midnightblue"></i></a>
             <a href="https://twitter.com/doYouEvenExist_"  style="margin-right:1em"><i class="fa fa-twitter" style="font-size:48px;color:midnightblue"></i></a>
             <a href="https://www.linkedin.com/in/theatinakylafi/" style="margin-right:1em"><i class="fa fa-linkedin" style="font-size:48px;color:midnightblue"></i></a> 
