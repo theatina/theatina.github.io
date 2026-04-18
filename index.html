@@ -1,130 +1,70 @@
 <!DOCTYPE html>
-<style>
-    
-
-    :root {
-        background-color: black;
-    }
-
-    a, fa{
-        outline: 0;
-    }
-
-    .fa:hover{
-        color:rgb(2, 57, 139) !important;
-        cursor:pointer;
-        outline-style: none;
-    }   
-    
-    .fa-github:hover{
-        color: rgb(6, 43, 112) !important;
-    }
-
-    /* .Theatina:hover {
-        color:rgb(216, 61, 61) !important ;
-    } */
-
-
-    #text {
-        color:rgb(71, 149, 238);
-        font-size: 50px;
-        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-        white-space: nowrap;
-
-        width: 100%; 
-        text-align: center; 
-        border-bottom: 1px solid #000; 
-        line-height: 0.1em;
-        margin: 10px 0 20px; 
-    }
-
-
-    .button-class {
-        background-color: slategrey;
-        color: black;
-        font-size: 20px;
-        border-radius: 19%;
-    }
-    
-    div {
-        height: 200px;
-        width: 400px;
-        background: black;
-
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        margin-top: -100px;
-        margin-left: -200px;
-    }
-    
-    /* .popup {
-        zoom:1.0;
-        position:relative;
-        text-decoration:none;
-    }
-    .popup span {
-        position:fixed;
-        top:170px;
-        left:500px;
-        width:350px;
-        padding:0px;
-        border:10px solid #000;
-        border-radius:50%;
-        left:-999em;
-        z-index:990;
-            
-    }
-    .popup:hover {visibility:visible}
-    .popup:hover span {left:350px;}
-    * html .popup span {position:absolute;}
-
-     */
-
-</style>
-
-<html>
-<header><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"></header>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Theatina K | AI Solutions Engineer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
 <body>
-    <!-- <audio controls autoplay>
-        <source src="./10_little_smurfs.mp3" type="audio/mp3">
-    </audio>   -->
 
-    <div>
-        <p id="text" style="text-align:center;">
+    <aside>
+        <h1>Theatina Kylafi</h1>
+        <p>AI Solutions Engineer | Artistic Creator</p>
+        
+        <div class="sidebar-contact">
+        <a href="mailto:ct.kylafi@gmail.com" class="fa fa-envelope" title="Email"></a>
+        <a href="https://www.linkedin.com/in/theatinakylafi/" target="_blank" class="fa fa-linkedin" title="LinkedIn"></a>
+        <a href="https://github.com/theatina" target="_blank" class="fa fa-github" title="GitHub"></a>
+        </div>
+        
+        <nav>
+            <button class="active" data-section="whoami">whoami</button>
+            <button data-section="cv">CV</button>
+            <button data-section="projects">Projects</button>
+            <button data-section="research">Research</button>
+            <button data-section="writing">Writing</button>
+            <button data-section="music">Music</button>
+        </nav>
+    </aside>
 
-            <a href="https://github.com/theatina" target="_blank" style="margin-left:0.9em"><i class="fa fa-github" style="font-size:70px;color: rgb(12, 81, 172);"></i></a><br>
-            
-            <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+    <main>
+        <section id="whoami" class="section active">
+            <h2>About Me</h2>
+            <div class="intro-container">
+                <img src="https://avatars.githubusercontent.com/u/9359428?v=4" alt="Theatina Kylafi" class="profile-pic" id="intro-image">
+                
+                <div id="whoami-text" class="intro-text-block">
+                    </div>
+            </div>
+        </section>
 
-            <a><b>I'm Theatina Kylafi</b></a>
-            
-            <!-- <a class="popup" href="#">I'm Theatina Kylafi<span><img src="./tina.jpg"></span></a> -->
-            
-            <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+        <section id="cv" class="section">
+            <h2>Curriculum Vitae</h2>
+            <div id="cv-content"></div> </section>
 
-            <a href="https://www.facebook.com/theatina/" target="_blank" style="margin-right:1em"><i class="fa fa-facebook" style="font-size:48px;color:midnightblue"></i></a>
-            <a href="https://twitter.com/doYouEvenExist_" target="_blank" style="margin-right:1em"><i class="fa fa-twitter" style="font-size:48px;color:midnightblue"></i></a>
-            <a href="https://www.linkedin.com/in/theatinakylafi/" target="_blank" style="margin-right:1em"><i class="fa fa-linkedin" style="font-size:48px;color:midnightblue"></i></a> 
-            <a href="https://www.instagram.com/doyouevenexist_/" target="_blank" style="margin-right:1em"><i class="fa fa-instagram" style="font-size:48px;color:midnightblue"></i></a> 
-            <a href="https://join.skype.com/invite/fCZJ0mpuhK7d " target="_blank"><i class="fa fa-skype" style="font-size:48px;color:midnightblue"></i></a>
+        <section id="projects" class="section">
+            <h2>Projects</h2>
+            <div id="project-grid" class="grid"></div>
+        </section>
 
-            
-        </p>
+        <section id="research" class="section">
+            <h2>Research</h2>
+            <div id="research-grid" class="grid"></div>
+        </section>
 
+        <section id="writing" class="section">
+            <h2>Writing</h2>
+            <div id="writing-list" class="grid"></div>
+        </section>
 
-    </div>
-    
-    <!-- <div>
+        <section id="music" class="section">
+            <h2>Piano</h2>
+            <div id="music-list" class="grid"></div>
+        </section>
+    </main>
 
-        <p id="text" style="text-align:center;">
-            
-            <b>Do you even <br><br>e x i s t<b>
-            
-        </p>
-
-    </div> -->
-
+    <script src="js/data.js"></script>
+    <script src="js/main.js"></script>
 </body>
 </html>
-

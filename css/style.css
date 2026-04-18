@@ -1,0 +1,243 @@
+:root {
+    --bg: #f8f9fa;
+    --sidebar-bg: #ffffff;
+    --accent: #2980b9;
+    --text-dark: #2c3e50;
+    --text-light: #7f8c8d;
+    --border: #edf2f7;
+}
+
+body {
+    margin: 0; font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg); color: var(--text-dark); display: flex;
+}
+
+/* Sidebar */
+aside {
+    width: 260px; height: 100vh; background: var(--sidebar-bg);
+    position: fixed; border-right: 1px solid var(--border);
+    padding: 40px 20px; display: flex; flex-direction: column;
+}
+
+aside h1 { font-size: 1.2rem; margin-bottom: 5px; color: var(--accent); }
+aside p { font-size: 0.8rem; color: var(--text-light); margin-bottom: 30px; }
+
+nav button {
+    display: block; width: 100%; text-align: left; background: none;
+    border: none; padding: 12px 15px; cursor: pointer;
+    font-size: 0.95rem; color: var(--text-dark); transition: 0.2s;
+    border-radius: 8px; margin-bottom: 5px;
+}
+
+nav button:hover, nav button.active {
+    background: #f0f4f8; color: var(--accent); font-weight: 600;
+}
+
+/* Content Area */
+main { margin-left: 260px; padding: 60px 80px; width: 100%; max-width: 900px; }
+
+.section { display: none; animation: fadeIn 0.4s ease; }
+.section.active { display: block; }
+
+.card {
+    background: white; padding: 25px; border-radius: 12px;
+    border: 1px solid var(--border); margin-bottom: 20px;
+    transition: transform 0.2s;
+}
+
+.card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+
+.tag {
+    display: inline-block; padding: 3px 10px; border-radius: 20px;
+    background: #e1f5fe; color: #0288d1; font-size: 0.7rem; font-weight: 700;
+    margin-bottom: 10px; text-transform: uppercase;
+}
+
+/* --- CV Accordion Styles --- */
+.cv-category-title {
+    margin-top: 40px;
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    border-bottom: 2px solid var(--accent);
+    display: inline-block;
+    margin-bottom: 20px;
+}
+
+.cv-item {
+    background: white;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    overflow: hidden; /* Vital for the slide effect */
+    transition: var(--card-shadow);
+}
+
+.cv-header {
+    padding: 20px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fff;
+    transition: background 0.3s;
+}
+
+.cv-header:hover {
+    background: #fcfcfc;
+}
+
+/* Makes the "Experience", "Education", and "Technical Expertise" titles blue */
+#cv-content h3 {
+    color: var(--accent); /* Using the blue variable we set earlier */
+    font-size: 1.4rem;
+    margin-bottom: 20px;
+    font-weight: 700;
+}
+
+.cv-header h4 {
+    margin: 0;
+    font-size: 1.05rem;
+}
+
+.cv-header .icon {
+    font-size: 0.8rem;
+    color: var(--accent);
+    transition: transform 0.3s;
+}
+
+/* This targets the company name and dates in the CV items */
+.cv-header small {
+    color: #575e5e; /* The elegant gray color */
+    font-size: 0.9rem;
+    font-weight: 400;
+    display: block; /* Puts it on a new line under the bold role */
+    margin-top: 4px;
+}
+
+/* Optional: If you want the dot separator to look nice */
+.cv-header small span {
+    margin: 0 5px;
+    opacity: 0.5;
+}
+
+/* When expanded... */
+.cv-item.active .icon {
+    transform: rotate(180deg);
+}
+
+.cv-body {
+    max-height: 0; /* Hidden by default */
+    overflow: hidden;
+    transition: max-height 0.4s cubic-bezier(0, 1, 0, 1);
+    padding: 0 20px;
+}
+
+.cv-item.active .cv-body {
+    max-height: 1000px; /* Large enough for content */
+    padding: 0 20px 20px 20px;
+    transition: max-height 0.4s ease-in-out;
+}
+
+/* Container for the list */
+.cv-details-list {
+    list-style: none;
+    padding: 0;
+    margin: 12px 0 0 0; /* Aligned with the left edge of the header text */
+}
+
+/* Individual list items using Flexbox */
+.cv-details-list li {
+    display: flex; /* Creates two columns: bullet and text */
+    align-items: flex-start; /* Aligns bullet with the top line of text */
+    gap: 10px; /* Precise control over the space between bullet and text */
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+    color: #444;
+    line-height: 1.6; /* Balanced vertical spacing */
+}
+
+/* Custom Blue Bullets */
+.cv-details-list li::before {
+    content: "•";
+    color: var(--accent);
+    font-weight: bold;
+    font-size: 1.2rem;
+    
+    /* This ensures the bullet is vertically centered with the first line's capital letters */
+    line-height: 1; 
+    margin-top: 2px; 
+    
+    flex-shrink: 0; /* Prevents the bullet from squishing on small screens */
+}
+
+/* Styles the "Focus:" label in the education section */
+.cv-focus-label {
+    color: var(--accent);
+    font-weight: 600;
+    margin-right: 5px;
+}
+
+.skill-tag-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* Sidebar Social Links */
+.sidebar-contact {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.sidebar-contact a {
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    transition: color 0.3s, transform 0.2s;
+    text-decoration: none;
+}
+
+.sidebar-contact a:hover {
+    color: var(--accent);
+    transform: translateY(-2px);
+}
+
+/* Intro Layout (Whoami) */
+.intro-container {
+    display: flex;
+    gap: 40px;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.profile-pic {
+    width: 200px;
+    height: 200px;
+    border-radius: 12px;
+    object-fit: cover;
+    background-color: #eee;
+    border: 1px solid var(--border);
+    box-shadow: var(--card-shadow);
+    flex-shrink: 0;
+}
+
+.intro-text-block {
+    flex-grow: 1;
+}
+
+.intro-text-block p {
+    margin-bottom: 20px;
+    font-size: 1.05rem;
+    color: var(--text-dark);
+}
+
+@media (max-width: 900px) {
+    .intro-container {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+}
