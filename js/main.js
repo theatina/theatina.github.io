@@ -1,157 +1,147 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Populate Whoami (Initial Render)
-    const introContainer = document.getElementById('whoami-text');
-    if (introContainer) {
-        // Map through the array and create <p> tags
-        introContainer.innerHTML = CV_DATA.profile.aboutMeSections.map(text => 
-            `<p>${text}</p>`
-        ).join('');
-    }
-
-    // (Optional) Update intro image if you have a path
-    // document.getElementById('intro-image').src = "assets/images/my-photo.jpg";
-
-    // 2. Setup Navigation
+    renderWhoami();
+    
     const navButtons = document.querySelectorAll('nav button');
+    const cvGroup = document.getElementById('cv-group');
+    const cvSubSections = ['experience-sub', 'skills-sub', 'certifications-sub', 'education-sub'];
+
     navButtons.forEach(btn => {
         btn.addEventListener('click', () => {
             const target = btn.dataset.section;
-            
-            // UI Toggle
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-            document.getElementById(target).classList.add('active');
+            const isCvSub = target.endsWith('-sub');
+            const isCvParent = target === 'cv';
+
+            navButtons.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
+
+            if (isCvSub || isCvParent) {
+                cvGroup.classList.add('expanded');
+                cvGroup.querySelector('.nav-parent').classList.add('active');
+            } else {
+                cvGroup.classList.remove('expanded');
+            }
+
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            const displayId = (isCvSub || isCvParent) ? 'cv' : target;
+            const targetSec = document.getElementById(displayId);
             
-            // Dynamic Function Calling (Case-sensitive fix)
-            const functionName = `render${target.charAt(0).toUpperCase() + target.slice(1).toLowerCase()}`;
-            if (typeof window[functionName] === 'function') {
-                window[functionName]();
+            if (targetSec) {
+                targetSec.classList.add('active');
+                if (displayId === 'cv') {
+                    renderMasterCv();
+                    if (isCvSub) {
+                        setTimeout(() => {
+                            const subElement = document.getElementById(target);
+                            if (subElement) {
+                                subElement.scrollIntoView({ behavior: 'smooth' });
+                                // TRIGGER HIGHLIGHT
+                                highlightRegion(subElement);
+                            }
+                        }, 150);
+                    }
+                }
+            }
+
+            if (!isCvSub && !isCvParent) {
+                const funcName = `render${target.charAt(0).toUpperCase() + target.slice(1).toLowerCase()}`;
+                if (typeof window[funcName] === 'function') window[funcName]();
             }
         });
     });
 });
 
-// ... Keep your renderCv, renderProjects, renderWriting, renderMusic functions exactly as they were ...
-
 /**
- * Section: CV (Experience, Education, Skills)
+ * Highlights a specific region with a pulse effect
  */
-function renderCv() {
-    const container = document.getElementById('cv-content');
-    if (!container) return;
-    container.innerHTML = ""; 
+function highlightRegion(element) {
+    element.classList.remove('region-highlight');
+    void element.offsetWidth; // Trigger reflow to restart animation
+    element.classList.add('region-highlight');
+    // Optional: remove after animation
+    setTimeout(() => element.classList.remove('region-highlight'), 2000);
+}
 
-    // Experience Section
-    let html = "<h3>Experience</h3>";
-    html += CV_DATA.cv.experience.map(exp => `
-        <div class="cv-item" onclick="this.classList.toggle('active')">
-            <div class="cv-header">
-                <div>
-                    <strong>${exp.role}</strong><br>
-                    <small>${exp.company} • ${exp.period}</small>
-                </div>
-                <div class="icon">▼</div>
-            </div>
-            <div class="cv-body">
-                <ul class="cv-details-list">
-                    ${exp.details.map(item => `<li>${item}</li>`).join('')}
-                </ul>
-            </div>
-        </div>
-    `).join('');
+function renderWhoami() {
+    document.getElementById('whoami-text').innerHTML = CV_DATA.profile.aboutMeSections.map(p => `<p>${p}</p>`).join('');
+    document.getElementById('whoami-snapshot').innerHTML = `
+        <div class="snapshot-group"><h4>Expertise</h4><div class="tag-cloud">${CV_DATA.profile.snapshot.expertise.map(t => `<span class="tag">${t}</span>`).join(' ')}</div></div>
+        <div class="snapshot-group"><h4>Soft Skills</h4><div class="tag-cloud">${CV_DATA.profile.snapshot.softskills.map(t => `<span class="tag">${t}</span>`).join(' ')}</div></div>
+        <div class="snapshot-group"><h4>Languages</h4><div class="tag-cloud">${CV_DATA.profile.snapshot.languages.map(t => `<span class="tag">${t}</span>`).join(' ')}</div></div>
+        <div class="snapshot-group"><h4>Beyond the Screen</h4><div class="tag-cloud">${CV_DATA.profile.snapshot.hobbies.map(t => `<span class="tag pink-tag">${t}</span>`).join(' ')}</div></div>
+    `;
+}
 
-    // Education Section
-    html += "<h3 style='margin-top:30px;'>Education</h3>";
-    html += CV_DATA.cv.education.map(edu => `
-        <div class="cv-item" onclick="this.classList.toggle('active')">
-            <div class="cv-header">
-                <div>
-                    <strong>${edu.degree}</strong><br>
-                    <small>${edu.school} • ${edu.period}</small>
-                </div>
-                <div class="icon">▼</div>
-            </div>
-            <div class="cv-body">
-                <p><span class="cv-focus-label">Focus:</span> ${edu.focus}</p>
-            </div>
-        </div>
-    `).join('');
+function renderMasterCv() {
+    renderExperience('experience-sub');
+    renderSkills('skills-sub');
+    renderCertifications('certifications-sub');
+    renderEducation('education-sub');
+}
 
-    // ... (rest of the skills logic remains the same)
-    container.innerHTML = html;
+function renderExperience(id) {
+    document.getElementById(id).innerHTML = "<h3>Professional Experience</h3>" + CV_DATA.experience.map(exp => `
+        <div class="cv-item" onclick="if(event.target.closest('.project-accordion')) return; this.classList.toggle('active')">
+            <div class="cv-header"><div><strong>${exp.role}</strong><small>${exp.company} • ${exp.period}</small></div><div class="icon">▼</div></div>
+            <div class="cv-body"><ul class="cv-details-list">${exp.details.map(d => `<li>${d}</li>`).join('')}</ul>
+                ${exp.projects ? `<div class="project-dropdown-list"><p class="project-list-label">Project Case Studies</p>
+                ${exp.projects.map(p => `<div class="project-accordion" onclick="event.stopPropagation(); this.classList.toggle('open')"><div class="project-acc-header"><span>${p.name}</span><i class="fa fa-chevron-down"></i></div><div class="project-acc-body"><p>${p.info}</p></div></div>`).join('')}</div>` : ''}
+            </div>
+        </div>`).join('');
 }
 
 /**
- * Section: Projects (Engineering & LLM)
+ * RENDER SKILLS
+ * Removed the "onclick" and "active" logic to keep it static.
  */
-function renderProjects() {
-    const container = document.getElementById('project-grid');
-    if (!container) return;
-    container.innerHTML = CV_DATA.projects.map(p => `
+function renderSkills(id) {
+    const container = document.getElementById(id);
+    container.innerHTML = "<h2>Technical Stack</h2>";
+    container.innerHTML += CV_DATA.skills.map(s => `
+        <div class="cv-item static">
+            <div class="cv-header" style="cursor: default;">
+                <strong>${s.name}</strong>
+            </div>
+            <div class="cv-body">
+                <div class="tag-cloud">
+                    ${s.items.map(i => `<span class="tag">${i}</span>`).join(' ')}
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderCertifications(id) {
+    document.getElementById(id).innerHTML = "<h3>Certifications</h3><div class='grid'>" + CV_DATA.certifications.map(c => `
+        <div class="card"><span class="tag">${c.issuer}</span><h4>${c.title}</h4><small>${c.date}</small><p>${c.desc}</p></div>`).join('') + "</div>";
+}
+
+function renderEducation(id) {
+    document.getElementById(id).innerHTML = "<h3>Education</h3>" + CV_DATA.education.map(e => `
+        <div class="cv-item" onclick="this.classList.toggle('active')"><div class="cv-header"><div><strong>${e.degree}</strong><small>${e.school} • ${e.period}</small></div><div class="icon">▼</div></div><div class="cv-body"><p><span class="cv-focus-label"><strong>Focus:</strong></span> ${e.focus}</p></div></div>`).join('');
+}
+
+// ... other renderers (Projects, Research, etc.) use the standard mapping logic
+function renderProjects() { 
+    document.getElementById('project-grid').innerHTML = CV_DATA.projects.map(p => `
         <div class="card">
             <span class="tag">${p.tag}</span>
-            <h3>${p.title}</h3>
-            <p style="font-size:0.9rem; color:#555;">${p.desc}</p>
-            <small><b>Tech:</b> ${p.tech}</small><br>
-            <a href="${p.link}" target="_blank" style="display:inline-block; margin-top:10px; color:var(--accent); font-weight:bold; text-decoration:none;">View Repo →</a>
-        </div>
-    `).join('');
-}
-
-/**
- * Section: Research
- */
-function renderResearch() {
-    const container = document.getElementById('research-grid');
-    if (!container) return;
-    
-    container.innerHTML = CV_DATA.research.map(res => `
-        <div class="card">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                <span class="tag" style="background: #eef2f7; color: var(--accent);">Publication</span>
+            <h4>${p.title}</h4>
+            <p>${p.desc}</p>
+            <div class="card-footer">
+                <a href="${p.link}" target="_blank">View Repository</a>
             </div>
-            <h3 style="margin-top:15px;">${res.title}</h3>
-            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top:-10px;"><i>${res.subtitle}</i></p>
-            <p style="font-size: 0.95rem;">${res.desc}</p>
-            <div style="margin-bottom:15px;">
-                ${res.tags.map(t => `<span style="font-size:0.75rem; margin-right:5px; color:#888;">#${t}</span>`).join('')}
-            </div>
-            <a href="${res.link}" target="_blank" style="text-decoration:none; color:var(--accent); font-weight:bold;">View Publication →</a>
-        </div>
-    `).join('');
+        </div>`).join(''); 
 }
 
-/**
- * Section: Writing (Updated)
- */
-function renderWriting() {
-    const container = document.getElementById('writing-list');
-    if (!container) return;
-    
-    container.innerHTML = CV_DATA.writing.map(w => `
-        <div class="card">
-            <span class="tag">Article</span>
-            <h3>${w.title}</h3>
-            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top:-10px;">${w.subtitle}</p>
-            <p>${w.desc}</p>
-            <a href="${w.link}" target="_blank" style="color:var(--accent); text-decoration:none; font-weight:bold;">Read More →</a>
-        </div>
-    `).join('');
+function renderResearch() { 
+    document.getElementById('research-grid').innerHTML = CV_DATA.research.map(r => `
+        <div class="research-row">
+            <h4>${r.title}</h4>
+            <div class="subtitle">${r.subtitle}</div>
+            <div class="tags">${r.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+            <a href="${r.link}" target="_blank">View Paper &rarr;</a>
+        </div>`).join(''); 
 }
 
-/**
- * Section: Music
- */
-function renderMusic() {
-    const container = document.getElementById('music-list');
-    if (!container) return;
-    container.innerHTML = CV_DATA.music.map(m => `
-        <div class="card">
-            <span class="tag">${m.type}</span>
-            <h3>${m.title}</h3>
-            <p>${m.desc}</p>
-            ${m.link !== "#" ? `<a href="${m.link}" target="_blank" style="color:var(--accent); text-decoration:none; font-weight:bold;">Listen →</a>` : ''}
-        </div>
-    `).join('');
-}
+function renderWriting() { document.getElementById('writing-list').innerHTML = CV_DATA.writing.map(w => `<div class="card"><h4>${w.title}</h4><p>${w.desc}</p></div>`).join(''); }
+function renderMusic() { document.getElementById('music-list').innerHTML = CV_DATA.music.map(m => `<div class="card"><h4>${m.title}</h4><p>${m.desc}</p></div>`).join(''); }
