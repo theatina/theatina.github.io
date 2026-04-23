@@ -40,7 +40,7 @@ nav button {
 nav button[data-section="whoami"] {
     font-family: 'JetBrains Mono', monospace !important;
     /* font-weight: 700 !important;  */
-    font-size: 1rem !important;
+    font-size: 1.1rem !important;
     text-transform: lowercase;
 }
 
@@ -174,6 +174,12 @@ main section h3,
 .project-acc-header { padding: 10px 15px; display: flex; justify-content: space-between; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
 .project-acc-body { max-height: 0; overflow: hidden; padding: 0 15px; transition: 0.3s ease; font-size: 0.85rem; color: var(--text-dark); }
 .project-accordion.open .project-acc-body { max-height: 200px; padding: 0 15px 12px 15px; }
+
+.project-acc-body p {
+    margin-top: 4px !important;    /* Reduces space below the header */
+    margin-bottom: 0 !important;   /* Removes space at the bottom */
+}
+
 /* --- Project Cards with Tags --- */
 .project-card-footer {
     display: flex;
@@ -264,3 +270,42 @@ main section h3,
 }
 
 @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+/* --- Mobile Responsive Layout --- */
+@media (max-width: 850px) {
+    body {
+        flex-direction: column;
+    }
+
+    aside {
+        width: 100%;
+        height: auto;
+        position: relative; /* Remove fixed positioning */
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        padding: 20px;
+    }
+
+    main {
+        margin-left: 0;
+        padding: 30px 20px;
+        width: 100%;
+        box-sizing: border-box; /* Ensures padding doesn't create overflow */
+    }
+
+    .intro-container {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .grid {
+        grid-template-columns: 1fr; /* Single column on mobile */
+    }
+    
+    /* Improve touch targets for nav buttons */
+    nav button {
+        padding: 15px;
+        font-size: 1.1rem;
+    }
+}

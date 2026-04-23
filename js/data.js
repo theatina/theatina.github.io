@@ -19,7 +19,7 @@ const CV_DATA = {
                 "Agentic Workflows & AI Agents", 
                 "RAG System Architecture", 
                 "AI Evaluation Frameworks",
-                "Requirements Analysis ( BDD/Gherkin )", 
+                "Requirements Analysis ( BDD / Gherkin )", 
                 "ETL Workflow Design"
             ],
             softskills: [
@@ -65,23 +65,19 @@ const CV_DATA = {
             projects: [
                 { 
                     name: "NOMOS AI", 
-                    info: "Legal Tech solution automating requirement analysis and documentation processing using RAG architectures." 
-                },
-                { 
-                    name: "IPTO ASSET AI", 
-                    info: "Energy sector initiative utilizing AI for asset management and operational pattern analysis." 
-                },
-                { 
-                    name: "NBG AI Assistant", 
-                    info: "FinTech application involving the design of agentic workflows for intelligent banking assistance on Azure AI." 
-                },
-                { 
-                    name: "HEDNO S.A. AI Agents", 
-                    info: "Specialized AI agents for streamlined communication and data retrieval within energy distribution networks." 
+                    info: "<b>Legal</b> Tech solution automating requirement analysis and documentation processing using RAG architectures." 
                 },
                 { 
                     name: "COSMOTE", 
-                    info: "Tailored AI solution design for telecommunications, focused on data intelligence and automated pattern detection." 
+                    info: " <b>Telecommunications</b> tailored AI solution design, focused on data intelligence and automated test case generation." 
+                },
+                { 
+                    name: "IPTO ASSET AI", 
+                    info: "<b>Energy</b> sector initiative utilizing AI for asset management and predictive maintenance through intelligent data retrieval and analysis." 
+                },
+                { 
+                    name: "NBG AI Assistant", 
+                    info: "<b>FinTech</b> application involving the design of agentic workflows for intelligent banking assistance." 
                 }
             ]
         },
@@ -90,20 +86,28 @@ const CV_DATA = {
             company: "Software & Product Development", 
             period: "Dec 2022 – Sep 2024", 
             details: [
-                "Gathered and documented functional requirements using BDD/Gherkin methodologies for high-profile international clients.",
+                "Gathered and documented functional requirements using BDD / Gherkin methodologies for high-profile international clients.",
                 "Drafted detailed technical specifications and monitored software project lifecycles to ensure successful delivery.",
                 "Conducted User Acceptance Testing (UAT) and provided technical support during complex system onboarding.",
                 "Collaborated with cross-functional teams to translate business needs into scalable software solutions."
             ],
             projects: [
                 { 
+                    name: "OTE", 
+                    info: "<b>Telecommunications</b> project focused on requirements analysis and solution design for a large-scale network management system." 
+                },
+                { 
+                    name: "INTERSALONICA", 
+                    info: "" 
+                },
+                { 
                     name: "Philip Morris International", 
-                    info: "Requirements gathering and specification drafting for global-scale management systems." 
+                    info: "" 
                 },
                 { 
                     name: "Vodafone", 
-                    info: "Management of BDD workflows and testing for telecommunications software deployment." 
-                }
+                    info: "" 
+                },
             ]
         },
         { 
@@ -128,23 +132,27 @@ const CV_DATA = {
 
     skills: [
         { 
-            name: "AI & GenAI Solutions", 
-            items: ["LangGraph", "LangSmith", "Prompt Flow", "Azure AI Services", "RAG Systems", "AI Agents", "Prompt Engineering"] 
+            name: "Generative AI", 
+            items: ["LangGraph", "LangSmith", "Langfuse", "Prompt Flow", "Azure AI Services", "RAG Systems", "Agentic Workflows", "Prompt Engineering", "Evaluation Framework Design"] 
         },
         { 
-            name: "Methodology & Business Analysis", 
-            items: ["Requirements Analysis", "BDD / Gherkin", "Agile Product Management", "Technical Blueprinting", "UAT", "ETL Pipelines", "Jira", "Confluence", "Power BI"] 
+            name: "Business Analysis | Product Management", 
+            items: ["Requirements Analysis", "Solution Design", "BDD / Gherkin", "Agile Product Management", "UAT", "ETL Pipelines", "Jira", "Confluence"] 
         },
         { 
-            name: "Data Science & Machine Learning", 
+            name: "Data Science | ML | NLP", 
             items: ["PyTorch", "TensorFlow", "Keras", "Scikit-learn", "NLTK", "Rasa", "Word2Vec", "Librosa", "Kaldi", "Praat", "Music21"] 
         },
+        {
+            name: "Systems Architecture | Software Development",
+            items: ["API Design", "Multithreading", "Socket Programming", "Data Structures", "Memory Management"]
+        },
         { 
-            name: "Programming & Languages", 
+            name: "Programming | Languages", 
             items: ["Python", "C", "C++", "Java", "SQL", "HTML", "PHP", "Assembly", "Bash-Scripting", "Matlab", "LaTeX"] 
         },
         { 
-            name: "Tools, IDEs & OS", 
+            name: "Tools | IDEs | Operating Systems", 
             items: ["Git", "Visual Studio Code", "MySQL Workbench", "MongoDB", "BeautifulSoup", "Windows", "MacOS", "Linux", "Android", "iOS"] 
         }
     ],
@@ -203,7 +211,7 @@ const CV_DATA = {
         { 
             title: "distilBERT QnA", 
             tag: "Model Optimization", 
-            desc: "Fine-tuned transformer model for high-speed Question Answering on the SQuAD 1.1 benchmark. Utilizes knowledge distillation to prioritize inference efficiency without sacrificing F1 performance.", 
+            desc: "Fine-tuned transformer model for Question Answering on the SQuAD 1.1 dataset. Utilizes knowledge distillation to prioritize inference efficiency without sacrificing F1 performance.", 
             tech: ["PyTorch", "Transformers", "BERT", "DistilBERT", "NLP", "Machine Learning"], 
             repo: "https://github.com/theatina/distilBERT_QnA",
             docs: "https://github.com/theatina/distilBERT_QnA/blob/main/Report.pdf"
