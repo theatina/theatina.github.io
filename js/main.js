@@ -14,11 +14,10 @@ document.addEventListener('DOMContentLoaded', () => {
             navButtons.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
 
-            if (isCvSub || isCvParent) {
-                cvGroup.classList.add('expanded');
-                cvGroup.querySelector('.nav-parent').classList.add('active');
-            } else {
-                cvGroup.classList.remove('expanded');
+            if (isCvParent) {
+                cvGroup.classList.toggle('expanded'); 
+            } else if (!isCvSub) {
+                cvGroup.classList.remove('expanded'); // Close if clicking other sections
             }
 
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
