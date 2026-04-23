@@ -11,6 +11,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const isCvSub = target.endsWith('-sub');
             const isCvParent = target === 'cv';
 
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+
             navButtons.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
 
@@ -153,3 +158,72 @@ function renderResearch() {
 
 function renderWriting() { document.getElementById('writing-list').innerHTML = CV_DATA.writing.map(w => `<div class="card"><h4>${w.title}</h4><p>${w.desc}</p></div>`).join(''); }
 function renderMusic() { document.getElementById('music-list').innerHTML = CV_DATA.music.map(m => `<div class="card"><h4>${m.title}</h4><p>${m.desc}</p></div>`).join(''); }
+
+/**
+ * BACK TO TOP BUTTON LOGIC
+ */
+const backToTopBtn = document.createElement("button");
+backToTopBtn.id = "back-to-top";
+// Uses the FontAwesome icon you already have loaded in your index.html
+backToTopBtn.innerHTML = '<i class="fa fa-arrow-up"></i>'; 
+document.body.appendChild(backToTopBtn);
+
+// Smooth visibility toggle based on scroll position
+window.addEventListener("scroll", () => {
+    if (window.scrollY > 300) {
+        backToTopBtn.classList.add("show");
+    } else {
+        backToTopBtn.classList.remove("show");
+    }
+});
+
+// Smooth scroll to top when clicked
+backToTopBtn.addEventListener("click", () => {
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+
+});
+
+/**
+ * MOBILE OVERLAY LOGIC
+ */
+const menuToggle = document.getElementById('menu-toggle');
+const overlay = document.getElementById('mobile-nav-overlay');
+const closeNav = document.getElementById('close-nav');
+
+// Only show button if user has scrolled past sidebar
+window.addEventListener('scroll', () => {
+    const aside = document.querySelector('aside');
+    if (window.scrollY > aside.offsetHeight) {
+        menuToggle.classList.add('show');
+    } else {
+        menuToggle.classList.remove('show');
+    }
+});
+
+// Open overlay
+menuToggle.addEventListener('click', () => {
+    // Clone original nav into overlay if not already there
+    const navContent = document.querySelector('aside nav').cloneNode(true);
+    const overlayNav = overlay.querySelector('nav');
+    overlayNav.innerHTML = '';
+    overlayNav.appendChild(navContent);
+    
+    // Re-attach click listeners to cloned buttons
+    overlayNav.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', () => {
+            overlay.classList.remove('active');
+            // Trigger the actual button click in the sidebar
+            document.querySelector(`aside nav button[data-section="${btn.dataset.section}"]`).click();
+        });
+    });
+    
+    overlay.classList.add('active');
+});
+
+// Close overlay
+closeNav.addEventListener('click', () => {
+    overlay.classList.remove('active');
+});
