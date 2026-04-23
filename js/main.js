@@ -127,14 +127,23 @@ function renderProjects() {
             <span class="tag">${p.tag}</span>
             <h4>${p.title}</h4>
             <p>${p.desc}</p>
-            <div class="card-footer">
-                <a href="${p.link}" target="_blank">View Repository</a>
+            
+            <div class="tech-tags" style="margin-top: 10px;">
+                ${p.tech.map(t => `<span class="tag-tech">${t}</span>`).join('')}
+            </div>
+            
+            <div class="card-footer" style="display: flex; gap: 15px;">
+                <a href="${p.repo}" target="_blank"><i class="fa fa-github"></i> Repository</a>
+                <a href="${p.docs}" target="_blank"><i class="fa fa-book"></i> Docs</a>
             </div>
         </div>`).join(''); 
 }
 
 function renderResearch() { 
-    document.getElementById('research-grid').innerHTML = CV_DATA.research.map(r => `
+    const container = document.getElementById('research-grid');
+    container.classList.remove('grid'); // Ensure it doesn't use column-based grid layout
+    
+    container.innerHTML = CV_DATA.research.map(r => `
         <div class="research-row">
             <h4>${r.title}</h4>
             <div class="subtitle">${r.subtitle}</div>

@@ -8,9 +8,10 @@ const CV_DATA = {
         name: "Theatina Kylafi",
         title: "AI Solutions Engineer | Data Scientist",
         aboutMeSections: [
-            "I am an AI Solutions Engineer with a multidisciplinary background in Language Technology, Computer Science, and Business Analysis. My expertise focuses on the end-to-end design, development, and evaluation of sophisticated AI pipelines, including agentic workflows and Retrieval-Augmented Generation (RAG) systems.",
+            "<b>AI Solutions Engineer</b> with a multidisciplinary background in Language Technology, Computer / Data Science, and Business Analysis.",
+            "My expertise focuses on the end-to-end design, development, and evaluation of sophisticated AI pipelines, including agentic workflows and Retrieval-Augmented Generation (RAG) systems.",
             "Specializing in the translation of complex organizational requirements into technical blueprints, I leverage my background as an IT Business Analyst to bridge the gap between business value and technical implementation. I am dedicated to establishing rigorous evaluation frameworks and optimizing model performance through data-driven analysis.",
-            "My work is rooted in a modern stack—utilizing tools like LangGraph, LangSmith, and Azure AI Services—to build scalable ETL workflows and intelligent assistants. Outside of engineering, my training as a classical pianist and researcher informs my commitment to precision, structured logic, and creative problem-solving."
+            "My work is rooted in a modern stack, including utilization of LangChain tools, and Azure AI Services to build scalable ETL workflows and intelligent assistants. Outside of engineering, my training as a classical pianist and researcher informs my commitment to precision, structured logic, and creative problem-solving."
         ],
         snapshot: {
             expertise: [
@@ -18,17 +19,17 @@ const CV_DATA = {
                 "Agentic Workflows & AI Agents", 
                 "RAG System Architecture", 
                 "AI Evaluation Frameworks",
-                "Requirements Analysis (BDD/Gherkin)", 
+                "Requirements Analysis ( BDD/Gherkin )", 
                 "ETL Workflow Design"
             ],
             softskills: [
                 "Team player", 
-                "Curious", 
-                "Creative",
                 "Critical thinker",
                 "Problem solver",
-                "Goal setter",
-                "Adaptable"
+                "Adaptable",
+                "Curious", 
+                "Creative",
+                "Goal setter"
             ],
             languages: [
                 "English ( C2 )", 
@@ -192,18 +193,76 @@ const CV_DATA = {
 
     projects: [
         { 
+            title: "Stress Detection", 
+            tag: "Sentiment Analysis | NLP", 
+            desc: "Multi-modal neural architecture for emotional state detection via lexical, syntactic, and emotional feature analysis. Resolves high-variance text classification tasks through hybrid model integration.", 
+            tech: ["Sentiment Analysis", "Feature Engineering", "Natural Language Processing", "LSTM", "CNN", "GRU", "BERT"], 
+            repo: "https://github.com/theatina/Stress_Detection",
+            docs: "https://github.com/theatina/Stress_Detection/blob/main/Report.pdf"
+        },
+        { 
             title: "distilBERT QnA", 
-            tag: "NLP", 
-            desc: "Fine-tuned transformer model optimized for high-speed Question Answering on the SQuAD dataset.", 
-            tech: "PyTorch / Transformers", 
-            link: "https://github.com/theatina/distilBERT_QnA" 
+            tag: "Model Optimization", 
+            desc: "Fine-tuned transformer model for high-speed Question Answering on the SQuAD 1.1 benchmark. Utilizes knowledge distillation to prioritize inference efficiency without sacrificing F1 performance.", 
+            tech: ["PyTorch", "Transformers", "BERT", "DistilBERT", "NLP", "Machine Learning"], 
+            repo: "https://github.com/theatina/distilBERT_QnA",
+            docs: "https://github.com/theatina/distilBERT_QnA/blob/main/Report.pdf"
+        },
+        { 
+            title: "CryptoRecommendation", 
+            tag: "Predictive Analytics | Clustering", 
+            desc: "Unsupervised clustering pipeline for social sentiment parsing. Employs K-Means feature vectorization to isolate market sentiment clusters from high-noise data. Demonstrates the application of clustering algorithms for actionable insights in volatile domains.", 
+            tech: ["K-Means", "Clustering", "Web Scraping", "Recommendation Systems", "C"], 
+            repo: "https://github.com/theatina/CryptoRecommendation",
+            docs: "https://github.com/theatina/CryptoRecommendation"
         },
         { 
             title: "iJazzARTIST", 
-            tag: "Music AI", 
-            desc: "Human-computer jazz interaction utilizing RNNs/LSTMs to emulate musical spontaneity in real-time.", 
-            tech: "Python / Music21 / MIDI", 
-            link: "https://github.com/theatina/iJazzARTIST" 
+            tag: "Deep Learning | MIR", 
+            desc: "Human-computer improvisation agent utilizing RNN architecture for real-time musical spontaneity. Features MIDI synchronization and predictive sequence modeling for collaborative performance.", 
+            tech: ["Music Information Retrieval", "Deep Learning", "Human–AI Interaction", "Generative AI", "RNN", "LSTM", "Music21", "Python"],
+            repo: "https://github.com/theatina/iJazzARTIST",
+            docs: "https://github.com/theatina/iJazzARTIST/blob/master/iJazzARTIST_CTKylafi.pdf"
+        },
+        { 
+            title: "KVDataBase", 
+            tag: "Systems Engineering", 
+            desc: "High-performance, multithreaded key-value store. Optimized for thread-safe state management and concurrent socket communication in high-throughput environments.", 
+            tech: ["Sockets", "Multithreading", "Data Structures", "Python"], 
+            repo: "https://github.com/theatina/KVDataBase",
+            docs: "https://github.com/theatina/KVDataBase/blob/master/code/docs/M111_Report_CTKylafi_LT1200012.pdf"
+        },
+        { 
+            title: "UniPal", 
+            tag: "Conversational AI", 
+            desc: "NLU-driven dialogue agent for academic information retrieval. Utilizes a scalable RASA-based intent classification engine to automate institutional knowledge access.", 
+            tech: ["Conversational AI", "Chatbot", "Dialogue Systems", "Rasa", "NLU", "Python"], 
+            repo: "https://github.com/theatina/UniPal",
+            docs: "https://github.com/theatina/UniPal/blob/master/Report.pdf"
+        },
+        { 
+            title: "myOwnServer", 
+            tag: "Systems Engineering", 
+            desc: "Multithreaded HTTP server and web crawler. Demonstrates proficiency in RFC-compliant request handling, connection multiplexing, and recursive web resource discovery.", 
+            tech: ["Socket API", "Data Structures", "C"], 
+            repo: "https://github.com/theatina/myOwnServer",
+            docs: "https://github.com/theatina/myOwnServer"
+        },
+        { 
+            title: "miniSearch", 
+            tag: "Search Engine Simulation", 
+            desc: "Search engine implementation featuring custom Trie data structures. Optimized for efficient word frequency indexing and low-latency prefix lookup.", 
+            tech: ["Search Indexing", "Algorithm Complexity", "Data Structures", "Trie", "C"], 
+            repo: "https://github.com/theatina/miniSearch",
+            docs: "https://github.com/theatina/miniSearch"
+        },
+        { 
+            title: "JazzICat", 
+            tag: "Real-time Generative AI", 
+            desc: "Real-time jazz improvisation accompaniment using Recurrent Neural Networks.", 
+            tech: ["Deep Learning", "LSTM", "Human–AI Interaction", "Generative AI", "Python"],
+            repo: "https://github.com/theatina/JazzICat",
+            docs: "https://github.com/theatina/JazzICat/blob/master/README.md"
         }
     ],
 
@@ -211,7 +270,7 @@ const CV_DATA = {
         { 
             title: "On the Adaptability of Recurrent Neural Networks for Jazz Interaction", 
             subtitle: "Frontiers in Artificial Intelligence, 2020", 
-            desc: "Peer-reviewed research exploring musical spontaneity and neural network interaction architectures.", 
+            desc: "Adaptive sequence modeling via Recurrent Neural Networks. Provides context-aware harmonic generation that adapts to human improvisation patterns in real-time.", 
             tags: ["RNN", "LSTM", "Music AI", "Deep Learning"], 
             link: "https://doi.org/10.3389/frai.2020.508727" 
         }
