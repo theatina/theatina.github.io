@@ -136,23 +136,23 @@ const CV_DATA = {
             items: ["LangGraph", "LangSmith", "Langfuse", "Prompt Flow", "Azure AI Services", "RAG Systems", "Agentic Workflows", "Prompt Engineering", "Evaluation Framework Design"] 
         },
         { 
-            name: "Business Analysis | Product Management", 
+            name: "Business Analysis ✦︎ Product Management", 
             items: ["Requirements Analysis", "Solution Design", "BDD / Gherkin", "Agile Product Management", "UAT", "ETL Pipelines", "Jira", "Confluence"] 
         },
         { 
-            name: "Data Science | ML | NLP", 
+            name: "Data Science ✦︎ ML ✦︎ NLP", 
             items: ["PyTorch", "TensorFlow", "Keras", "Scikit-learn", "NLTK", "Rasa", "Word2Vec", "Librosa", "Kaldi", "Praat", "Music21"] 
         },
         {
-            name: "Systems Architecture | Software Development",
+            name: "Systems Architecture ✦︎ Software Development",
             items: ["API Design", "Multithreading", "Socket Programming", "Data Structures", "Memory Management"]
         },
         { 
-            name: "Programming | Languages", 
+            name: "Programming ✦︎ Languages", 
             items: ["Python", "C", "C++", "Java", "SQL", "HTML", "PHP", "Assembly", "Bash-Scripting", "Matlab", "LaTeX"] 
         },
         { 
-            name: "Tools | IDEs | Operating Systems", 
+            name: "Tools ✦︎ IDEs ✦︎ Operating Systems", 
             items: ["Git", "Visual Studio Code", "MySQL Workbench", "MongoDB", "BeautifulSoup", "Windows", "MacOS", "Linux", "Android", "iOS"] 
         }
     ],
