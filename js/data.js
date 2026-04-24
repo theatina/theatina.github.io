@@ -133,7 +133,7 @@ const CV_DATA = {
     skills: [
         { 
             name: "Generative AI", 
-            items: ["LangGraph", "LangSmith", "Langfuse", "Prompt Flow", "Azure AI Services", "RAG Systems", "Agentic Workflows", "Prompt Engineering", "Evaluation Framework Design"] 
+            items: ["LangGraph", "Langfuse", "LangSmith", "Azure AI Services", "Prompt Flow", "RAG Systems", "Agentic Workflows", "Prompt Engineering", "Evaluation Framework Design"] 
         },
         { 
             name: "Business Analysis ✦︎ Product Management", 
