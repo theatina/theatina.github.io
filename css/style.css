@@ -30,6 +30,21 @@ aside p { font-size: 0.85rem; color: var(--text-light); margin-bottom: 30px; }
     margin-top: 2px; 
 }
 
+/* Style for the first letter */
+.first-letter {
+    color: var(--accent); /* Dark blue (from your root variables) */
+    font-weight: 800;      /* Bold */
+    margin-right: 0.8px;     /* Optional: adds a tiny bit of breathing room */
+    font-family: 'Inter', sans-serif;
+    font-size: 1.1rem;
+}
+
+/* Ensure the hover/active states don't conflict */
+nav button:hover .first-letter, 
+nav button.active .first-letter {
+    color: var(--accent); /* Keeps it consistent when selected */
+}
+
 nav button {
     display: block; width: 100%; text-align: left; background: none;
     border: none; padding: 12px 15px; cursor: pointer;
