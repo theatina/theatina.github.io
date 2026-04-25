@@ -270,7 +270,7 @@ main section h3,
 }
 
 .intro-container { display: flex; gap: 40px; align-items: center; margin-bottom: 50px; }
-.profile-pic { width: 200px; height: 200px; border-radius: 12px; object-fit: cover; border: 1px solid var(--border); box-shadow: var(--card-shadow); flex-shrink: 0; }
+.profile-pic { width: 250px; height: 250px; border-radius: 10px; object-fit: scale-down; border: 1px solid var(--border); box-shadow: var(--card-shadow); flex-shrink: 0; }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
 .card { background: white; padding: 25px; border-radius: 12px; border: 1px solid var(--border); box-shadow: var(--card-shadow); }
 .card h4 {
@@ -312,7 +312,7 @@ main section h3,
     height: 50px;
     background: rgba(255, 255, 255, 0.9);
     border: 1px solid var(--accent);
-    border-radius: 50%;
+    border-radius: 50%; 
     color: var(--accent);
     
     /* REMOVE display: none; */
