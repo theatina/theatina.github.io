@@ -1,9 +1,78 @@
 document.addEventListener('DOMContentLoaded', () => {
     renderWhoami();
     
+    // UI Elements
+    const menuToggle = document.getElementById('menu-toggle');
+    const overlay = document.getElementById('mobile-nav-overlay');
+    const closeNav = document.getElementById('close-nav');
+    const backToTopBtn = document.createElement("button");
+
+    // Back-to-Top Setup
+    backToTopBtn.id = "back-to-top";
+    backToTopBtn.innerHTML = '<i class="fa fa-arrow-up"></i>'; 
+    document.body.appendChild(backToTopBtn);
+
+    // --- Consolidated Scroll Listener ---
+    window.addEventListener('scroll', () => {
+        // 1. Back-to-Top visibility
+        if (window.scrollY > 300) {
+            backToTopBtn.style.display = "flex";
+        } else {
+            backToTopBtn.style.display = "none";
+        }
+
+        // 2. Burger Menu visibility (only on mobile)
+        const aside = document.querySelector('aside');
+        if (window.innerWidth <= 850) {
+            if (window.scrollY > aside.offsetHeight) {
+                menuToggle.classList.add('show');
+            } else {
+                menuToggle.classList.remove('show');
+            }
+        } else {
+            menuToggle.classList.remove('show');
+        }
+    });
+
+    // --- Back-to-Top Click (Fixed "Blue Button" Issue) ---
+    backToTopBtn.addEventListener("click", () => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        backToTopBtn.blur(); // Force remove focus immediately
+        setTimeout(() => backToTopBtn.blur(), 600); // Safety blur after scroll
+    });
+
+    // --- Mobile Overlay Logic ---
+    menuToggle.addEventListener('click', () => {
+        const navContent = document.querySelector('aside nav').cloneNode(true);
+        const overlayNav = overlay.querySelector('nav');
+        overlayNav.innerHTML = '';
+        overlayNav.appendChild(navContent);
+        
+        overlayNav.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (btn.classList.contains('nav-parent')) {
+                    btn.parentElement.classList.toggle('expanded');
+                    return;
+                }
+                closeMobileNav();
+                const targetBtn = document.querySelector(`aside nav button[data-section="${btn.dataset.section}"]`);
+                if (targetBtn) targetBtn.click();
+            });
+        });
+        menuToggle.classList.add('active');
+        overlay.classList.add('active');
+    });
+
+    function closeMobileNav() {
+        menuToggle.classList.remove('active');
+        overlay.classList.remove('active');
+    }
+
+    closeNav.addEventListener('click', closeMobileNav);
+
+    // --- Navigation Logic ---
     const navButtons = document.querySelectorAll('nav button');
     const cvGroup = document.getElementById('cv-group');
-    const cvSubSections = ['experience-sub', 'skills-sub', 'certifications-sub', 'education-sub'];
 
     navButtons.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -11,10 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const isCvSub = target.endsWith('-sub');
             const isCvParent = target === 'cv';
 
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
 
             navButtons.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
@@ -22,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isCvParent) {
                 cvGroup.classList.toggle('expanded'); 
             } else if (!isCvSub) {
-                cvGroup.classList.remove('expanded'); // Close if clicking other sections
+                cvGroup.classList.remove('expanded');
             }
 
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -38,7 +104,6 @@ document.addEventListener('DOMContentLoaded', () => {
                             const subElement = document.getElementById(target);
                             if (subElement) {
                                 subElement.scrollIntoView({ behavior: 'smooth' });
-                                // TRIGGER HIGHLIGHT
                                 highlightRegion(subElement);
                             }
                         }, 150);
@@ -55,13 +120,12 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /**
- * Highlights a specific region with a pulse effect
+ * RENDER FUNCTIONS
  */
 function highlightRegion(element) {
     element.classList.remove('region-highlight');
-    void element.offsetWidth; // Trigger reflow to restart animation
+    void element.offsetWidth;
     element.classList.add('region-highlight');
-    // Optional: remove after animation
     setTimeout(() => element.classList.remove('region-highlight'), 2000);
 }
 
@@ -93,23 +157,13 @@ function renderExperience(id) {
         </div>`).join('');
 }
 
-/**
- * RENDER SKILLS
- * Removed the "onclick" and "active" logic to keep it static.
- */
 function renderSkills(id) {
     const container = document.getElementById(id);
     container.innerHTML = "<h2>Technical Stack</h2>";
     container.innerHTML += CV_DATA.skills.map(s => `
         <div class="cv-item static">
-            <div class="cv-header" style="cursor: default;">
-                <strong>${s.name}</strong>
-            </div>
-            <div class="cv-body">
-                <div class="tag-cloud">
-                    ${s.items.map(i => `<span class="tag">${i}</span>`).join(' ')}
-                </div>
-            </div>
+            <div class="cv-header" style="cursor: default;"><strong>${s.name}</strong></div>
+            <div class="cv-body"><div class="tag-cloud">${s.items.map(i => `<span class="tag">${i}</span>`).join(' ')}</div></div>
         </div>
     `).join('');
 }
@@ -124,29 +178,20 @@ function renderEducation(id) {
         <div class="cv-item" onclick="this.classList.toggle('active')"><div class="cv-header"><div><strong>${e.degree}</strong><small>${e.school} • ${e.period}</small></div><div class="icon">▼</div></div><div class="cv-body"><p><span class="cv-focus-label"><strong>Focus:</strong></span> ${e.focus}</p></div></div>`).join('');
 }
 
-// ... other renderers (Projects, Research, etc.) use the standard mapping logic
 function renderProjects() { 
     document.getElementById('project-grid').innerHTML = CV_DATA.projects.map(p => `
         <div class="card">
             <span class="tag">${p.tag}</span>
             <h4>${p.title}</h4>
             <p>${p.desc}</p>
-            
-            <div class="tech-tags" style="margin-top: 10px;">
-                ${p.tech.map(t => `<span class="tag-tech">${t}</span>`).join('')}
-            </div>
-            
-            <div class="card-footer" style="display: flex; gap: 15px;">
-                <a href="${p.repo}" target="_blank"><i class="fa fa-github"></i> Repository</a>
-                <a href="${p.docs}" target="_blank"><i class="fa fa-book"></i> Docs</a>
-            </div>
+            <div class="tech-tags" style="margin-top: 10px;">${p.tech.map(t => `<span class="tag-tech">${t}</span>`).join('')}</div>
+            <div class="card-footer"><a href="${p.repo}" target="_blank"><i class="fa fa-github"></i> Repository</a><a href="${p.docs}" target="_blank"><i class="fa fa-book"></i> Docs</a></div>
         </div>`).join(''); 
 }
 
 function renderResearch() { 
     const container = document.getElementById('research-grid');
-    container.classList.remove('grid'); // Ensure it doesn't use column-based grid layout
-    
+    container.classList.remove('grid');
     container.innerHTML = CV_DATA.research.map(r => `
         <div class="research-row">
             <h4>${r.title}</h4>
@@ -158,89 +203,3 @@ function renderResearch() {
 
 function renderWriting() { document.getElementById('writing-list').innerHTML = CV_DATA.writing.map(w => `<div class="card"><h4>${w.title}</h4><p>${w.desc}</p></div>`).join(''); }
 function renderMusic() { document.getElementById('music-list').innerHTML = CV_DATA.music.map(m => `<div class="card"><h4>${m.title}</h4><p>${m.desc}</p></div>`).join(''); }
-
-/**
- * BACK TO TOP BUTTON LOGIC
- */
-const backToTopBtn = document.createElement("button");
-backToTopBtn.id = "back-to-top";
-// Uses the FontAwesome icon you already have loaded in your index.html
-backToTopBtn.innerHTML = '<i class="fa fa-arrow-up"></i>'; 
-document.body.appendChild(backToTopBtn);
-
-// Smooth visibility toggle based on scroll position
-window.addEventListener('scroll', () => {
-    const aside = document.querySelector('aside');
-    // Change this logic to be more lenient or remove it entirely for mobile
-    if (window.innerWidth <= 850 || window.scrollY > aside.offsetHeight) {
-        menuToggle.classList.add('show');
-    } else {
-        menuToggle.classList.remove('show');
-    }
-});
-
-// Smooth scroll to top when clicked
-backToTopBtn.addEventListener("click", () => {
-    window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-    });
-
-});
-
-/**
- * MOBILE OVERLAY LOGIC
- */
-const menuToggle = document.getElementById('menu-toggle');
-const overlay = document.getElementById('mobile-nav-overlay');
-const closeNav = document.getElementById('close-nav');
-
-// Only show button if user has scrolled past sidebar
-window.addEventListener('scroll', () => {
-    const aside = document.querySelector('aside');
-    if (window.scrollY > aside.offsetHeight) {
-        menuToggle.classList.add('show');
-    } else {
-        menuToggle.classList.remove('show');
-    }
-
-    backToTopBtn.classList.add("show");
-});
-
-// Open overlay
-menuToggle.addEventListener('click', () => {
-    // Clone original nav into overlay if not already there
-    const navContent = document.querySelector('aside nav').cloneNode(true);
-    const overlayNav = overlay.querySelector('nav');
-    overlayNav.innerHTML = '';
-    overlayNav.appendChild(navContent);
-    
-    // Re-attach click listeners to cloned buttons
-    overlayNav.querySelectorAll('button').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            // Check if it's the CV parent button
-            if (btn.classList.contains('nav-parent')) {
-                // Toggle the expanded class in the overlay, don't close the menu
-                const group = btn.parentElement;
-                group.classList.toggle('expanded');
-                return; // Stop here, keep the menu open
-            }
-            
-            // For all other buttons (subsections or main links), close the overlay
-            overlay.classList.remove('active');
-            menuToggle.classList.remove('active');
-
-            // Trigger the actual button click in the main sidebar
-            const targetBtn = document.querySelector(`aside nav button[data-section="${btn.dataset.section}"]`);
-            if (targetBtn) targetBtn.click();
-        });
-    });
-    menuToggle.classList.add('active');
-    overlay.classList.add('active');
-});
-
-// Close overlay
-closeNav.addEventListener('click', () => {
-    menuToggle.classList.remove('active'); // Reset icon animation
-    overlay.classList.remove('active');
-});
