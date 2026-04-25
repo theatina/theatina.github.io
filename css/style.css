@@ -301,28 +301,19 @@ main section h3,
     position: fixed;
     bottom: 30px;
     right: 30px;
-    z-index: 1000;
-    
-    /* Modern Styling */
+    z-index: 9999; /* Higher than other components */
     width: 50px;
     height: 50px;
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.9);
     border: 1px solid var(--accent);
     border-radius: 50%;
     color: var(--accent);
-    
-    /* Flex alignment for the icon */
-    display: flex;
+    display: none; /* Changed from opacity:0/visibility:hidden for better control */
     align-items: center;
     justify-content: center;
     font-size: 20px;
     cursor: pointer;
-    
-    /* Animation & Shadow */
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    opacity: 0;
-    visibility: hidden;
     transition: all 0.3s ease;
 }
 
@@ -333,8 +324,8 @@ main section h3,
 
 #back-to-top:hover {
     transform: translateY(-5px);
-    background: var(--accent);
-    color: white;
+    background: var(--accent) !important;
+    color: white !important;
 }
 
 .menu-toggle {
@@ -343,9 +334,9 @@ main section h3,
     top: 20px;
     right: 20px;
     z-index: 2002;
-    background: rgba(255, 255, 255, 0.8); /* Semi-transparent white */
+    background: rgba(255, 255, 255, 0.8); 
     backdrop-filter: blur(10px);
-    border: 1px solid var(--accent); /* Accent border */
+    border: 1px solid var(--accent); 
     padding: 10px;
     border-radius: 8px;
     cursor: pointer;
@@ -356,6 +347,7 @@ main section h3,
     align-items: center;
     justify-content: center;
 }
+
 
 /* Container for the icon */
 .hamburger-box {
@@ -475,6 +467,9 @@ main section h3,
     display: block;
 }
 
+.menu-toggle {
+    display: none; 
+}
 /* --- Mobile Responsive Layout --- */
 @media (max-width: 850px) {
     body {
@@ -537,7 +532,7 @@ main section h3,
     }
 
     .menu-toggle {
-        display: block;
+        display: flex;
         position: fixed;
         top: 20px;
         right: 20px; /* Moved to top-right */
@@ -561,4 +556,12 @@ main section h3,
     /* Class added by JS to show the header when user scrolls */
     .mobile-header.show { display: block; }
 
+}
+
+@media (hover: hover) {
+    #back-to-top:hover {
+        transform: translateY(-5px);
+        background: var(--accent) !important;
+        color: white !important;
+    }
 }
