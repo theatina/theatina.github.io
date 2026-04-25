@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+    formatNavItems();
     renderWhoami();
     
     // UI Elements
@@ -140,6 +141,23 @@ function highlightRegion(element) {
     void element.offsetWidth;
     element.classList.add('region-highlight');
     setTimeout(() => element.classList.remove('region-highlight'), 2000);
+}
+
+function formatNavItems() {
+    const navItems = document.querySelectorAll('nav button');
+
+    navItems.forEach(btn => {
+        const section = btn.dataset.section;
+        const text = btn.innerText;
+
+        if (section === 'whoami') {
+            // Special handling for Whoami: wrap "Who"
+            btn.innerHTML = `<span class="first-letter">Who</span>${text.slice(3)}`;
+        } else if (['cv', 'projects', 'research'].includes(section)) {
+            // Standard handling for others: wrap first letter
+            btn.innerHTML = `<span class="first-letter">${text.charAt(0)}</span>${text.slice(1)}`;
+        }
+    });
 }
 
 function renderWhoami() {
