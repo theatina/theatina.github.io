@@ -349,7 +349,7 @@ main section h3,
     z-index: 2002;
     background: rgba(255, 255, 255, 0.8); 
     backdrop-filter: blur(10px);
-    border: 1px solid var(--accent); 
+    border: 0.1px solid var(--accent); 
     padding: 10px;
     border-radius: 8px;
     cursor: pointer;
@@ -377,7 +377,7 @@ main section h3,
     width: 20px;
     height: 2px;
     background-color: var(--accent);
-    border-radius: 4px;
+    border-radius: 5px;
     position: relative; /* Needed to position the other two lines */
     top: 50%;         
     margin-top: -1.5px;
@@ -391,7 +391,7 @@ main section h3,
     width: 20px;
     height: 2px;
     background-color: var(--accent);
-    border-radius: 4px;
+    border-radius: 5px;
     position: absolute;
     left: 0;
     transition: all 0.3s ease;
