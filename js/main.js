@@ -82,6 +82,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     navButtons.forEach(btn => {
         btn.addEventListener('click', () => {
+            // Inside navButtons.forEach listener
+            if (btn.classList.contains('active')) {
+            // Special case: If it's the CV parent, we still want to allow toggling 
+            // even if it's "active", so we don't return here if it's the CV button.
+                if (btn.dataset.section !== 'cv') return;
+            }
+
             const target = btn.dataset.section;
             const isCvSub = target.endsWith('-sub');
             const isCvParent = target === 'cv';
@@ -127,9 +134,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (typeof window[funcName] === 'function') window[funcName]();
             }
             
+            const newUrl = target === 'whoami' ? '/' : `/?section=${target}`;
+            history.pushState({ section: target }, "", newUrl);
+
             // Close mobile nav if open
             if (window.innerWidth <= 850) closeMobileNav();
         });
+    });
+
+    window.addEventListener('popstate', (event) => {
+        // Get the section from the URL query parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const section = urlParams.get('section') || 'whoami'; // Default to whoami
+        
+        // Find the button that corresponds to this section and click it programmatically
+        const targetBtn = document.querySelector(`nav button[data-section="${section}"]`);
+        if (targetBtn) {
+            targetBtn.click();
+        }
     });
 });
 
@@ -206,7 +228,15 @@ function renderCertifications(id) {
 
 function renderEducation(id) {
     document.getElementById(id).innerHTML = "<h3>Education</h3>" + CV_DATA.education.map(e => `
-        <div class="cv-item" onclick="this.classList.toggle('active')"><div class="cv-header"><div><strong>${e.degree}</strong><small>${e.school} • ${e.period}</small></div><div class="icon">▼</div></div><div class="cv-body"><p><span class="cv-focus-label"><strong>Focus:</strong></span> ${e.focus}</p></div></div>`).join('');
+        <div class="cv-item" onclick="this.classList.toggle('active')">
+            <div class="cv-header">
+                <div><strong>${e.degree}</strong><small>${e.school} • ${e.period}</small></div>
+                <div class="icon">▼</div>
+            </div>
+            <div class="cv-body">
+                <p><span class="cv-focus-label">Focus:</span> ${e.focus}</p>
+            </div>
+        </div>`).join('');
 }
 
 function renderProjects() { 
