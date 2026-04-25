@@ -22,7 +22,7 @@ aside {
 aside h1 { font-size: 1.8rem; color: var(--accent); font-weight: 700; margin-top: 10px; margin-bottom: 1px; }
 aside p { font-size: 0.85rem; color: var(--text-light); margin-bottom: 30px; }
 
-.sidebar-contact { display: flex; gap: 15px; margin-bottom: 30px; }
+.sidebar-contact { display: flex; gap: 15px; margin-bottom: 35px; }
 .sidebar-contact a { color: var(--text-dark); font-size: 1.2rem; text-decoration: none; transition: 0.2s; }
 .sidebar-contact a:hover { color: var(--accent); transform: translateY(-2px); }
 .sidebar-contact .cv-icon {
@@ -145,6 +145,10 @@ main section h3,
 .cv-header small { color: var(--text-light); font-size: 0.9rem; display: block; margin-top: 10px; }
 .cv-header .icon { color: var(--accent); transition: 0.3s; }
 .cv-item.active .icon { transform: rotate(180deg); }
+.cv-focus-label {
+    color: var(--accent); 
+    font-weight: 700;     
+}
 
 .cv-body { max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0, 1, 0, 1); padding: 0 20px; }
 .cv-item.active .cv-body { max-height: 1500px; padding: 0 20px 20px 20px; }
