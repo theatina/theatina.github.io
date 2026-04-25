@@ -16,9 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('scroll', () => {
         // 1. Back-to-Top visibility
         if (window.scrollY > 300) {
-            backToTopBtn.style.display = "flex";
+            backToTopBtn.classList.add('show');
         } else {
-            backToTopBtn.style.display = "none";
+            backToTopBtn.classList.remove('show');
         }
 
         // 2. Burger Menu visibility (only on mobile)
@@ -34,11 +34,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- Back-to-Top Click (Fixed "Blue Button" Issue) ---
     backToTopBtn.addEventListener("click", () => {
+        backToTopBtn.classList.add('flash-active');
+
         window.scrollTo({ top: 0, behavior: "smooth" });
-        backToTopBtn.blur(); // Force remove focus immediately
-        setTimeout(() => backToTopBtn.blur(), 600); // Safety blur after scroll
+
+        setTimeout(() => {
+            backToTopBtn.classList.remove('flash-active');
+        }, 1000);
+
+        backToTopBtn.blur();
     });
 
     // --- Mobile Overlay Logic ---
