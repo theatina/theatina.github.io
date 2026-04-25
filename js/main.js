@@ -169,11 +169,13 @@ backToTopBtn.innerHTML = '<i class="fa fa-arrow-up"></i>';
 document.body.appendChild(backToTopBtn);
 
 // Smooth visibility toggle based on scroll position
-window.addEventListener("scroll", () => {
-    if (window.scrollY > 300) {
-        backToTopBtn.classList.add("show");
+window.addEventListener('scroll', () => {
+    const aside = document.querySelector('aside');
+    // Change this logic to be more lenient or remove it entirely for mobile
+    if (window.innerWidth <= 850 || window.scrollY > aside.offsetHeight) {
+        menuToggle.classList.add('show');
     } else {
-        backToTopBtn.classList.remove("show");
+        menuToggle.classList.remove('show');
     }
 });
 
@@ -201,6 +203,8 @@ window.addEventListener('scroll', () => {
     } else {
         menuToggle.classList.remove('show');
     }
+
+    backToTopBtn.classList.add("show");
 });
 
 // Open overlay
@@ -213,17 +217,30 @@ menuToggle.addEventListener('click', () => {
     
     // Re-attach click listeners to cloned buttons
     overlayNav.querySelectorAll('button').forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (e) => {
+            // Check if it's the CV parent button
+            if (btn.classList.contains('nav-parent')) {
+                // Toggle the expanded class in the overlay, don't close the menu
+                const group = btn.parentElement;
+                group.classList.toggle('expanded');
+                return; // Stop here, keep the menu open
+            }
+            
+            // For all other buttons (subsections or main links), close the overlay
             overlay.classList.remove('active');
-            // Trigger the actual button click in the sidebar
-            document.querySelector(`aside nav button[data-section="${btn.dataset.section}"]`).click();
+            menuToggle.classList.remove('active');
+
+            // Trigger the actual button click in the main sidebar
+            const targetBtn = document.querySelector(`aside nav button[data-section="${btn.dataset.section}"]`);
+            if (targetBtn) targetBtn.click();
         });
     });
-    
+    menuToggle.classList.add('active');
     overlay.classList.add('active');
 });
 
 // Close overlay
 closeNav.addEventListener('click', () => {
+    menuToggle.classList.remove('active'); // Reset icon animation
     overlay.classList.remove('active');
 });

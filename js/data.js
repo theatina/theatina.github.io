@@ -8,10 +8,10 @@ const CV_DATA = {
         name: "Theatina Kylafi",
         title: "AI Solutions Engineer | Data Scientist",
         aboutMeSections: [
-            "<b>AI Solutions Engineer</b> with a multidisciplinary background in Language Technology, Computer / Data Science, and Business Analysis.",
+            "<span class='small-sep'>✦︎</span> <b>AI Solutions Engineer</b> with a multidisciplinary background in Language Technology, Computer & Data Science, and Business Analysis.",
             "My expertise focuses on the end-to-end design, development, and evaluation of sophisticated AI pipelines, including agentic workflows and Retrieval-Augmented Generation (RAG) systems.",
             "Specializing in the translation of complex organizational requirements into technical blueprints, I leverage my background as an IT Business Analyst to bridge the gap between business value and technical implementation. I am dedicated to establishing rigorous evaluation frameworks and optimizing model performance through data-driven analysis.",
-            "My work is rooted in a modern stack, including utilization of LangChain tools, and Azure AI Services to build scalable ETL workflows and intelligent assistants. Outside of engineering, my training as a classical pianist and researcher informs my commitment to precision, structured logic, and creative problem-solving."
+            "My work is rooted in a modern stack, including utilization of LangChain tools, and Azure AI Services to build scalable ETL workflows and intelligent assistants. Outside of engineering, my training as a classical pianist and researcher informs my commitment to precision, structured logic, and creative problem-solving. <span class='small-sep'>✦︎</span>"
         ],
         snapshot: {
             expertise: [
@@ -136,23 +136,23 @@ const CV_DATA = {
             items: ["LangGraph", "LangSmith", "Langfuse", "Prompt Flow", "Azure AI Services", "RAG Systems", "Agentic Workflows", "Prompt Engineering", "Evaluation Framework Design"] 
         },
         { 
-            name: "Business Analysis ✦︎ Product Management", 
+            name: "Business Analysis <span class='small-sep'>✦︎</span> Product Management", 
             items: ["Requirements Analysis", "Solution Design", "BDD / Gherkin", "Agile Product Management", "UAT", "ETL Pipelines", "Jira", "Confluence"] 
         },
         { 
-            name: "Data Science ✦︎ ML ✦︎ NLP", 
+            name: "Data Science <span class='small-sep'>✦︎</span> ML <span class='small-sep'>✦︎</span> NLP", 
             items: ["PyTorch", "TensorFlow", "Keras", "Scikit-learn", "NLTK", "Rasa", "Word2Vec", "Librosa", "Kaldi", "Praat", "Music21"] 
         },
         {
-            name: "Systems Architecture ✦︎ Software Development",
+            name: "Systems Architecture <span class='small-sep'>✦︎</span> Software Development",
             items: ["API Design", "Multithreading", "Socket Programming", "Data Structures", "Memory Management"]
         },
         { 
-            name: "Programming ✦︎ Languages", 
+            name: "Programming <span class='small-sep'>✦︎</span> Languages", 
             items: ["Python", "C", "C++", "Java", "SQL", "HTML", "PHP", "Assembly", "Bash-Scripting", "Matlab", "LaTeX"] 
         },
         { 
-            name: "Tools ✦︎ IDEs ✦︎ Operating Systems", 
+            name: "Tools <span class='small-sep'>✦︎</span> IDEs <span class='small-sep'>✦︎</span> Operating Systems", 
             items: ["Git", "Visual Studio Code", "MySQL Workbench", "MongoDB", "BeautifulSoup", "Windows", "MacOS", "Linux", "Android", "iOS"] 
         }
     ],
@@ -183,19 +183,19 @@ const CV_DATA = {
             degree: "M.Sc. in Language Technology", 
             school: "National & Kapodistrian University of Athens & Athena RC", 
             period: "Pending Thesis Completion", 
-            focus: "Natural Language Processing and AI" 
+            focus: "Computational Linguistics, Natural Language Processing & Deep Learning" 
         },
         { 
             degree: "B.Sc. in Computer Science", 
             school: "National & Kapodistrian University of Athens", 
             period: "Graduated July 2020", 
-            focus: "Artificial Intelligence and Data Science" 
+            focus: "Computer Science, Data Structures, Algorithms & Software Engineering" 
         },
         { 
             degree: "Classical Piano Degree", 
             school: "National Conservatory of Athens", 
             period: "Graduated 2016", 
-            focus: "Performance, Music Theory, and Harmony" 
+            focus: "Piano, Music Theory, Solfège & Performance" 
         }
     ],
 
