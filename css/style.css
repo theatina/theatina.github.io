@@ -77,7 +77,11 @@ nav button:hover, nav button.active { background: rgba(41, 128, 185, 0.08); colo
 .nav-group.expanded .nav-parent i { transform: rotate(180deg); }
 
 main { margin-left: 260px; padding: 60px 80px; width: 100%; max-width: 1000px; }
-.section { display: none; animation: fadeIn 0.4s ease; }
+/* .section { display: none; animation: fadeIn 0.4s ease; } */
+.section {
+    display: none;
+    animation: fadeIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+} 
 .section.active { display: block; }
 
 /* --- Standardized Section Titles --- */
@@ -467,7 +471,15 @@ main section h3,
     display: block;
 }
 
+.mobile-nav-overlay {
+    /* ... existing styles ... */
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+}
 
+/* 2. Improve scroll behavior globally */
+html {
+    scroll-behavior: smooth;
+}
 
 .menu-toggle {
     display: none; 
@@ -477,6 +489,18 @@ main section h3,
     body {
         flex-direction: column;
         overflow-x: hidden;
+    }
+
+    /* Prevent body jitter during nav open */
+    body.nav-open {
+        overflow: hidden;
+    }
+
+    /* Make the mobile menu slide more fluidly */
+    .mobile-nav-overlay.active {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
     }
 
     aside {
@@ -568,7 +592,7 @@ main section h3,
 @keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translateY(10px); /* Slightly more distance for a smoother rise */
+        transform: translateY(15px); /* Slightly more distance for a smoother rise */
     }
     to {
         opacity: 1;

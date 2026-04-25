@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const isCvSub = target.endsWith('-sub');
             const isCvParent = target === 'cv';
 
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            // window.scrollTo({ top: 0, behavior: 'smooth' });
 
             navButtons.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
@@ -96,30 +96,38 @@ document.addEventListener('DOMContentLoaded', () => {
                 cvGroup.classList.remove('expanded');
             }
 
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             const displayId = (isCvSub || isCvParent) ? 'cv' : target;
             const targetSec = document.getElementById(displayId);
-            
-            if (targetSec) {
-                targetSec.classList.add('active');
-                if (displayId === 'cv') {
-                    renderMasterCv();
-                    if (isCvSub) {
-                        setTimeout(() => {
-                            const subElement = document.getElementById(target);
-                            if (subElement) {
-                                subElement.scrollIntoView({ behavior: 'smooth' });
-                                highlightRegion(subElement);
-                            }
-                        }, 150);
-                    }
+            const currentActive = document.querySelector('.section.active');
+
+            // If switching sections, perform fade transition
+            if (currentActive !== targetSec) {
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                if (targetSec) {
+                    targetSec.classList.add('active');
+                    if (displayId === 'cv') renderMasterCv();
                 }
             }
+            
+            if (isCvSub) {
+                const subElement = document.getElementById(target);
+                if (subElement) {
+                    // Ensure smooth transition to element
+                    subElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    highlightRegion(subElement);
+                }
+            } else {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
 
+            // 5. Trigger specific render function for non-CV
             if (!isCvSub && !isCvParent) {
                 const funcName = `render${target.charAt(0).toUpperCase() + target.slice(1).toLowerCase()}`;
                 if (typeof window[funcName] === 'function') window[funcName]();
             }
+            
+            // Close mobile nav if open
+            if (window.innerWidth <= 850) closeMobileNav();
         });
     });
 });
