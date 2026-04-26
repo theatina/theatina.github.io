@@ -39,6 +39,34 @@ aside p { font-size: 0.85rem; color: var(--text-light); margin-bottom: 30px; }
     font-size: 1.1rem;
 }
 
+.sidebar-contact { 
+    display: flex; 
+    gap: 15px; 
+    margin-bottom: 35px; 
+    align-items: center; 
+}
+
+/* Larger Home Icon */
+.home-icon {
+    font-size: 1.2rem !important; /* Made significantly larger */
+    color: var(--accent) !important; /* Ensure it uses the accent color */
+    opacity: 0.9;
+}
+
+/* Separator styling */
+.sidebar-separator {
+    color: var(--border); /* Subtle grey that matches your borders */
+    font-weight: 300;
+    margin: 0 2px 0 2px; /* Adds a bit of space around the separator */
+    font-size: 1.2rem;
+}
+
+/* Ensure the links remain centered with the separator */
+.home-link-wrapper {
+    display: flex;
+    align-items: center;
+}
+
 /* Ensure the hover/active states don't conflict */
 nav button:hover .first-letter, 
 nav button.active .first-letter {
@@ -91,7 +119,218 @@ nav button:hover, nav button.active { background: rgba(41, 128, 185, 0.08); colo
 }
 .nav-group.expanded .nav-parent i { transform: rotate(180deg); }
 
-main { margin-left: 260px; padding: 60px 80px; width: 100%; max-width: 1000px; }
+/* --- 1. Layout & Centering --- */
+#landing.section.active {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    min-height: 100vh !important;
+    width: 100% !important;
+    padding: 0;
+}
+
+.landing-center-wrapper {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important; /* Centers the terminal block itself */
+    justify-content: center !important;
+    width: 100%;
+}
+
+/* --- Title & Subtitle Styling --- */
+.landing-center-wrapper h1 {
+    font-size: 3rem;
+    margin-bottom: 0rem;
+    color: var(--text-dark);
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1); /* Subtle shadow */
+}
+
+.landing-center-wrapper .subtitle {
+    font-size: 1.2rem;
+    color: var(--text-light); /* Lighter grey */
+    margin-top: 0rem; 
+    margin-bottom: 1rem;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.05); /* Lighter shadow */
+}
+
+.landing-socials {
+    font-size: 1.2rem;
+    display: flex;
+    gap: 25px;
+    margin: 3px 0 5px 0;
+}
+
+.landing-socials a {
+    text-decoration: none !important; /* Forces underline off */
+    border: none !important;
+    color: var(--text-dark);
+}
+
+.landing-socials a:hover {
+    color: var(--accent);
+    transform: translateY(-3px);
+    filter: drop-shadow(0 4px 6px rgba(41, 128, 185, 0.3));
+}
+
+/* --- 2. Terminal Styling --- */
+.terminal-window {
+    width: 100%;
+    max-width: 600px;
+    height: 180px;      /* Locked height */
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    padding: 25px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Vertically centers the text block */
+    overflow: hidden;        /* Clips anything larger than 180px */
+    position: relative;
+    box-shadow: var(--card-shadow);
+}
+
+#terminal-output {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* --- 2. Terminal Styling --- */
+.terminal-line {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 1rem;
+    white-space: nowrap;
+    display: block;
+    width: 100%;
+    height: 1.5rem; /* Locked height for the line itself */
+    overflow: hidden;
+}
+
+/* Re-add the cursor as a separate element to keep it from jumping */
+.terminal-line.active-cursor .cmd::after {
+    content: "|";
+    display: inline-block;
+    color: var(--accent);
+    animation: blink 1s step-end infinite;
+    margin-left: 2px;
+}
+
+.active-cursor::after {
+    content: "|";
+    color: var(--accent);
+    margin-left: 2px;
+    animation: blink 1s step-end infinite;
+}
+
+/* Container for the terminal */
+#terminal-display {
+    width: 100%;
+    max-width: 600px; /* Keep it compact */
+    margin: 20px auto; /* Centers the whole terminal block on the page */
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1rem;
+    display: grid;
+    /* 'auto' for the path, '1fr' for the typing text */
+    grid-template-columns: auto 1fr;
+    gap: 10px;
+    align-items: start;
+    text-align: left; /* Keep text left-aligned for a real terminal feel */
+}
+
+.path { 
+    color: var(--accent); 
+    font-weight: bold; 
+    white-space: nowrap; 
+    padding-top: 2px;
+}
+
+.cmd { 
+    word-break: break-word; /* Wraps text cleanly */
+    line-height: 1.5;
+    color: var(--text-dark);
+}
+
+/* Cursor */
+.cmd::after {
+    content: "|";
+    animation: blink 1s step-end infinite;
+    color: var(--accent);
+    margin-left: 2px;
+}
+
+@keyframes blink {
+    50% { opacity: 0; }
+}
+
+/* --- 3. UI Elements --- */
+.cta-btn {
+    background: transparent;
+    font-size: 0.95rem;
+    border: 1px solid var(--accent);
+    box-shadow: 0px 8px 10px var(--accent);
+    color: var(--accent);
+    padding: 10px 20px;
+    border-radius: 50px; /* Modern pill shape */
+    margin-top: 20px;
+    margin-bottom: 30px;
+    font-weight: 700;
+    /* text-transform: uppercase; */
+    letter-spacing: 1.2px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.cta-btn:hover { 
+    background: var(--accent); 
+    color: white; 
+    transform: scale(1.05);
+    box-shadow: 0 8px 20px rgba(41, 128, 185, 0.2);
+}
+
+/* --- 4. Responsive & Layout Fixes --- */
+/* Use this to toggle visibility instead of CSS targeting inside #landing */
+body.landing-page {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+}
+
+body.landing-page aside { display: none !important; }
+body.landing-page main {
+    margin-left: 0 !important;
+    width: 100% !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 0 !important;
+}
+
+@media (max-width: 850px) {
+    .terminal-window { width: 95%; height: 160px; }
+    .landing-center-wrapper { padding: 15px; }
+}
+
+main {
+    padding: 60px 80px;
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+/* Sidebar state (Desktop only, only when not on landing page) */
+@media (min-width: 851px) {
+    body:not(.landing-page) main {
+        margin-left: 260px;
+        width: calc(100% - 260px);
+    }
+}
+
 /* .section { display: none; animation: fadeIn 0.4s ease; } */
 .section {
     display: none;
@@ -584,6 +823,14 @@ html {
         right: 20px; /* Moved to top-right */
         left: auto;  /* Remove left alignment */
         z-index: 1002;
+    }
+
+    /* Ensure icons in mobile menu align with text */
+    .mobile-nav-overlay nav button i {
+        width: 20px; /* Forces all icons to occupy the same width for perfect alignment */
+        text-align: center;
+        margin-right: 10px;
+        color: var(--accent);
     }
 
     /* Create a visible header background only when scrolling */

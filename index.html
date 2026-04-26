@@ -22,7 +22,12 @@
         <p>AI Solutions Engineer | Data Scientist</p>
         
         <div class="sidebar-contact">
+            <div class="home-link-wrapper">
+                <a href="#" onclick="navigateTo('landing')" class="fa fa-home home-icon" title="Home"></a>
+            </div>
             
+            <span class="sidebar-separator">|</span>
+
             <a href="https://drive.google.com/file/d/16zPTyDZ7rTBc7MarOI6lAOt6JdeHEI78/view" target="_blank" class="fa fa-file-text-o cv-icon" title="Download CV"></a>
             <a href="mailto:ct.kylafi@gmail.com" class="fa fa-envelope"></a>
             <a href="https://linkedin.com/in/theatinakylafi/" target="_blank" class="fa fa-linkedin"></a>
@@ -52,7 +57,25 @@
     </aside>
 
     <main>
-        <section id="whoami" class="section active">
+        <section id="landing" class="section active">
+            <div class="landing-center-wrapper">
+                <h1>Theatina Kylafi</h1>
+                <p class="subtitle">AI Solutions Engineer | Data Scientist</p>
+                
+                <div class="landing-socials">
+                    <a href="https://linkedin.com/in/theatinakylafi/" target="_blank" class="fa fa-linkedin"></a>
+                    <a href="mailto:ct.kylafi@gmail.com" class="fa fa-envelope"></a>
+                    <a href="https://github.com/theatina" target="_blank" class="fa fa-github"></a>
+                </div>
+
+                <button class="cta-btn" onclick="navigateTo('whoami')">who am i</button>
+
+                <div id="terminal-display" style="height: 1.5rem; margin: 20px 20px 20px 20px; font-family: 'JetBrains Mono', monospace;"></div>
+
+            </div>
+        </section>
+
+        <section id="whoami" class="section">
             <h2>About Me</h2>
             <div class="intro-container">
                 <img src="assets\0-02-05-c11f490ec159f5dcba09bb6c35d13a8c1f22dbc5763da6a915f782ddf4ce8936_59fc40a61ab2ee79.jpg" alt="Theatina Kylafi" class="profile-pic">
