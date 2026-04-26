@@ -166,8 +166,8 @@ main section h3,
 
 /* Tech Stack - Star Separator config */
 .small-sep {
-    font-size: 0.8rem;    /* Makes the star smaller */
-    padding: 0px 6px 5px 6px;       /* Adds space on both sides */
+    font-size: 0.6rem;    /* Makes the star smaller */
+    padding: 2px 6px 5px 6px;       /* Adds space on both sides */
     vertical-align: middle;
     display: inline-block;
     color: var(--accent); /* Keeps the accent color consistent */
