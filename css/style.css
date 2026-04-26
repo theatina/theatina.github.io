@@ -139,14 +139,14 @@ nav button:hover, nav button.active { background: rgba(41, 128, 185, 0.08); colo
 
 /* --- Title & Subtitle Styling --- */
 .landing-center-wrapper h1 {
-    font-size: 3rem;
+    font-size: 2rem;
     margin-bottom: 0rem;
     color: var(--text-dark);
     text-shadow: 2px 2px 4px rgba(0,0,0,0.1); /* Subtle shadow */
 }
 
 .landing-center-wrapper .subtitle {
-    font-size: 1.2rem;
+    font-size: 1rem;
     color: var(--text-light); /* Lighter grey */
     margin-top: 0rem; 
     margin-bottom: 1rem;
@@ -154,7 +154,7 @@ nav button:hover, nav button.active { background: rgba(41, 128, 185, 0.08); colo
 }
 
 .landing-socials {
-    font-size: 1.2rem;
+    font-size: 1rem;
     display: flex;
     gap: 25px;
     margin: 3px 0 5px 0;
@@ -201,7 +201,7 @@ nav button:hover, nav button.active { background: rgba(41, 128, 185, 0.08); colo
 /* --- 2. Terminal Styling --- */
 .terminal-line {
     font-family: 'JetBrains Mono', 'Fira Code', monospace;
-    font-size: 1rem;
+    font-size: 0.8rem;
     white-space: nowrap;
     display: block;
     width: 100%;
@@ -228,29 +228,25 @@ nav button:hover, nav button.active { background: rgba(41, 128, 185, 0.08); colo
 /* Container for the terminal */
 #terminal-display {
     width: 100%;
-    max-width: 600px; /* Keep it compact */
-    margin: 20px auto; /* Centers the whole terminal block on the page */
+    max-width: 600px;
+    margin: 20px auto;
     font-family: 'JetBrains Mono', monospace;
     font-size: 1rem;
-    display: grid;
-    /* 'auto' for the path, '1fr' for the typing text */
-    grid-template-columns: auto 1fr;
-    gap: 10px;
-    align-items: start;
-    text-align: left; /* Keep text left-aligned for a real terminal feel */
+    color: var(--text-dark);
+    display: block; /* Change from grid to block */
+    text-align: left;
 }
 
 .path { 
     color: var(--accent); 
     font-weight: bold; 
-    white-space: nowrap; 
-    padding-top: 2px;
+    margin-right: 10px;
+    display: inline; /* Keep path inline with the command */
 }
 
 .cmd { 
-    word-break: break-word; /* Wraps text cleanly */
-    line-height: 1.5;
-    color: var(--text-dark);
+    display: inline; /* Flow naturally with the path */
+    word-wrap: break-word;
 }
 
 /* Cursor */
