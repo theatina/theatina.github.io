@@ -157,27 +157,6 @@ const CV_DATA = {
         }
     ],
 
-    certifications: [
-        { 
-            title: "IEEE CertifAIEd™ Foundations", 
-            issuer: "IEEE Standards Association", 
-            date: "04/2025", 
-            desc: "AI Ethics Assessment Overview and foundational principles for responsible AI implementation." 
-        },
-        { 
-            title: "watsonx.data Technical Sales Intermediate", 
-            issuer: "IBM", 
-            date: "10/2024", 
-            desc: "Data Governance & AI focusing on Lakehouse architectures and data-driven decision systems." 
-        },
-        { 
-            title: "AWS Academy Cloud Foundations", 
-            issuer: "Amazon Web Services", 
-            date: "03/2021", 
-            desc: "Core concepts of cloud computing, security, and cloud architecture." 
-        }
-    ],
-
     education: [
         { 
             degree: "M.Sc. in Language Technology", 
@@ -196,6 +175,27 @@ const CV_DATA = {
             school: "National Conservatory of Athens", 
             period: "Graduated 2016", 
             focus: "Piano, Music Theory, Solfège & Performance" 
+        }
+    ],
+
+    certifications: [
+        { 
+            title: "IEEE CertifAIEd™ Foundations", 
+            issuer: "IEEE Standards Association", 
+            date: "04/2025", 
+            desc: "AI Ethics Assessment Overview and foundational principles for responsible AI implementation." 
+        },
+        { 
+            title: "watsonx.data Technical Sales Intermediate", 
+            issuer: "IBM", 
+            date: "10/2024", 
+            desc: "Data Governance & AI focusing on Lakehouse architectures and data-driven decision systems." 
+        },
+        { 
+            title: "AWS Academy Cloud Foundations", 
+            issuer: "Amazon Web Services", 
+            date: "03/2021", 
+            desc: "Core concepts of cloud computing, security, and cloud architecture." 
         }
     ],
 
