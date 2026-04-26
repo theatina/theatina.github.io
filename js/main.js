@@ -2,16 +2,17 @@ document.addEventListener('DOMContentLoaded', () => {
     formatNavItems();
     renderWhoami();
     
+    // 1. Get the parameter from the URL
     const urlParams = new URLSearchParams(window.location.search);
     const sectionFromUrl = urlParams.get('section');
     
-    if (sectionFromUrl) {
-        const targetBtn = document.querySelector(`nav button[data-section="${sectionFromUrl}"]`);
-        if (targetBtn) {
-            targetBtn.click();
-        }
-    }
+    // 2. Determine the section
+    // If sectionFromUrl exists, use it. If not, default to 'whoami'
+    const section = sectionFromUrl || 'whoami';
     
+    // 3. Navigate
+    navigateTo(section);
+
     // UI Elements
     const menuToggle = document.getElementById('menu-toggle');
     const overlay = document.getElementById('mobile-nav-overlay');
@@ -144,8 +145,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (typeof window[funcName] === 'function') window[funcName]();
             }
             
-            const newUrl = target === 'whoami' ? '/' : `/?section=${target}`;
-            history.pushState({ section: target }, "", newUrl);
+            if (event.isTrusted) {
+                const newUrl = target === 'whoami' ? '/' : `/?section=${target}`;
+                history.pushState({ section: target }, "", newUrl);
+            }
 
             // Close mobile nav if open
             if (window.innerWidth <= 850) closeMobileNav();
@@ -155,13 +158,11 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('popstate', (event) => {
         // Get the section from the URL query parameter
         const urlParams = new URLSearchParams(window.location.search);
-        const section = urlParams.get('section') || 'whoami'; // Default to whoami
+        const section = urlParams.get('section') || 'whoami'; 
         
-        // Find the button that corresponds to this section and click it programmatically
-        const targetBtn = document.querySelector(`nav button[data-section="${section}"]`);
-        if (targetBtn) {
-            targetBtn.click();
-        }
+        // Call the navigation function directly
+        // This updates the UI without double-triggering events
+        navigateTo(section);
     });
 });
 
@@ -190,6 +191,45 @@ function formatNavItems() {
             btn.innerHTML = `<span class="first-letter">${text.charAt(0)}</span>${text.slice(1)}`;
         }
     });
+}
+
+function navigateTo(section) {
+    // 1. Find the target button
+    const btn = document.querySelector(`nav button[data-section="${section}"]`);
+    if (!btn) return;
+
+    // 2. Update UI State
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    // 3. Handle Nav Groups (CV sub-menus)
+    const isCvSub = section.endsWith('-sub');
+    const isCvParent = section === 'cv';
+    const cvGroup = document.getElementById('cv-group');
+
+    if (isCvParent) {
+        cvGroup.classList.add('expanded');
+    } else if (!isCvSub) {
+        cvGroup.classList.remove('expanded');
+    }
+
+    // 4. Update Section Visibility
+    const displayId = (isCvSub || isCvParent) ? 'cv' : section;
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    const targetSec = document.getElementById(displayId);
+    if (targetSec) targetSec.classList.add('active');
+
+    // 5. Trigger Rendering
+    if (displayId === 'cv') renderMasterCv();
+    const funcName = `render${displayId.charAt(0).toUpperCase() + displayId.slice(1).toLowerCase()}`;
+    if (typeof window[funcName] === 'function') window[funcName]();
+
+    // 6. Scroll
+    if (isCvSub) {
+        document.getElementById(section)?.scrollIntoView({ behavior: 'smooth' });
+    } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 }
 
 function renderWhoami() {
@@ -274,3 +314,4 @@ function renderResearch() {
 
 function renderWriting() { document.getElementById('writing-list').innerHTML = CV_DATA.writing.map(w => `<div class="card"><h4>${w.title}</h4><p>${w.desc}</p></div>`).join(''); }
 function renderMusic() { document.getElementById('music-list').innerHTML = CV_DATA.music.map(m => `<div class="card"><h4>${m.title}</h4><p>${m.desc}</p></div>`).join(''); }
+
