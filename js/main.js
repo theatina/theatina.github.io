@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // 2. Determine the section
     // If sectionFromUrl exists, use it. If not, default to 'whoami'
-    const section = sectionFromUrl || 'whoami';
+    const section = sectionFromUrl || 'landing';
     
     // 3. Navigate
     navigateTo(section);
@@ -63,6 +63,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const navContent = document.querySelector('aside nav').cloneNode(true);
         const overlayNav = overlay.querySelector('nav');
         overlayNav.innerHTML = '';
+
+        const homeBtn = document.createElement('button');
+        homeBtn.innerHTML = '<i class="fa fa-home" style="margin-right: 20px;"></i>';
+        homeBtn.onclick = () => {
+            navigateTo('landing');
+            closeMobileNav();
+        };
+        overlayNav.appendChild(homeBtn);
+
         overlayNav.appendChild(navContent);
         
         overlayNav.querySelectorAll('button').forEach(btn => {
@@ -146,7 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             if (event.isTrusted) {
-                const newUrl = target === 'whoami' ? '/' : `/?section=${target}`;
+                const newUrl = target === 'landing' ? '/' : `/?section=${target}`;
                 history.pushState({ section: target }, "", newUrl);
             }
 
@@ -158,7 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('popstate', (event) => {
         // Get the section from the URL query parameter
         const urlParams = new URLSearchParams(window.location.search);
-        const section = urlParams.get('section') || 'whoami'; 
+        const section = urlParams.get('section') || 'landing'; 
         
         // Call the navigation function directly
         // This updates the UI without double-triggering events
@@ -166,9 +175,66 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-/**
- * RENDER FUNCTIONS
- */
+async function initTerminal() {
+    const display = document.getElementById('terminal-display');
+    const path = "theatina@portfolio:~$ ";
+    const wait = (ms) => new Promise(res => setTimeout(res, ms));
+
+    const rawPool = [
+        ...CV_DATA.profile.aboutMeSections,
+        ...CV_DATA.experience.map(e => `Experience: ${e.role} @ ${e.company}`),
+        ...CV_DATA.skills.map(s => `Tech: ${s.items.join(' | ')}`)
+    ].map(s => s.replace(/<[^>]*>/g, ''));
+
+    function shuffle(array) {
+        let currentIndex = array.length, randomIndex;
+        while (currentIndex != 0) {
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+            [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+        }
+        return array;
+    }
+
+    // Initialize once
+    display.innerHTML = `<span class="path">${path}</span><span class="cmd"></span>`;
+    const cmdSpan = display.querySelector('.cmd');
+
+    while (document.getElementById('landing').classList.contains('active')) {
+        const textPool = shuffle([...rawPool]);
+
+        for (let sentence of textPool) {
+            // 1. Typing
+            for (let i = 0; i <= sentence.length; i++) {
+                // Simulate a backspace typo
+                if (Math.random() > 0.98 && i > 5) {
+                    cmdSpan.textContent = sentence.substring(0, i) + 'X'; // Typo
+                    await wait(200);
+                    cmdSpan.textContent = sentence.substring(0, i - 1); // Backspace
+                    await wait(100);
+                }
+                cmdSpan.textContent = sentence.substring(0, i);
+                await wait(Math.random() * 60 + 40);
+            }
+
+            await wait(3000); // Read time
+
+            // 2. Disappear by backspacing the whole sentence
+            for (let i = sentence.length; i >= 0; i--) {
+                cmdSpan.textContent = sentence.substring(0, i);
+                await wait(30); // Eraser speed
+            }
+            
+            await wait(500); // Pause before next sentence
+        }
+    }
+}
+
+// Ensure the CTA button navigates to the 'whoami' section
+document.querySelector('.cta-btn').addEventListener('click', () => {
+    navigateTo('whoami');
+});
+
 function highlightRegion(element) {
     element.classList.remove('region-highlight');
     void element.offsetWidth;
@@ -194,37 +260,65 @@ function formatNavItems() {
 }
 
 function navigateTo(section) {
-    // 1. Find the target button
+    const aside = document.querySelector('aside');
+    const main = document.querySelector('main');
+    const isMobile = window.innerWidth <= 850;
+
+    // 1. Reset state
+    document.body.classList.remove('landing-page');
+    aside.style.display = '';
+    main.style.marginLeft = '';
+
+    // 2. Handle Landing Page Layout
+    if (section === 'landing') {
+        document.body.classList.add('landing-page');
+        aside.style.display = 'none';
+        main.style.marginLeft = '0';
+        initTerminal();
+    } 
+    // 3. Handle Other Pages (Mobile vs Desktop logic)
+    else {
+        if (isMobile) {
+            // Only show aside if explicitly on 'whoami', otherwise hide for clean content
+            aside.style.display = (section === 'whoami') ? 'block' : 'none';
+            main.style.marginLeft = '0';
+        } else {
+            aside.style.display = 'flex';
+            main.style.marginLeft = '260px';
+        }
+    }
+
+    // 2. Navigation Button State
     const btn = document.querySelector(`nav button[data-section="${section}"]`);
-    if (!btn) return;
-
-    // 2. Update UI State
     document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
+    if (btn) btn.classList.add('active');
 
-    // 3. Handle Nav Groups (CV sub-menus)
+    // 3. CV Accordion State
     const isCvSub = section.endsWith('-sub');
     const isCvParent = section === 'cv';
     const cvGroup = document.getElementById('cv-group');
-
-    if (isCvParent) {
-        cvGroup.classList.add('expanded');
-    } else if (!isCvSub) {
-        cvGroup.classList.remove('expanded');
+    if (cvGroup) {
+        if (isCvParent) cvGroup.classList.add('expanded');
+        else if (!isCvSub) cvGroup.classList.remove('expanded');
     }
 
-    // 4. Update Section Visibility
+    // 4. Section Visibility
     const displayId = (isCvSub || isCvParent) ? 'cv' : section;
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
     const targetSec = document.getElementById(displayId);
     if (targetSec) targetSec.classList.add('active');
 
-    // 5. Trigger Rendering
-    if (displayId === 'cv') renderMasterCv();
-    const funcName = `render${displayId.charAt(0).toUpperCase() + displayId.slice(1).toLowerCase()}`;
-    if (typeof window[funcName] === 'function') window[funcName]();
+    // 5. Trigger Rendering (Cleaned up logic)
+    if (displayId === 'landing') {
+        // initTerminal(); // REMOVE OR COMMENT OUT THIS LINE
+    } else if (displayId === 'cv') {
+        renderMasterCv();
+    } else {
+        const funcName = `render${displayId.charAt(0).toUpperCase() + displayId.slice(1).toLowerCase()}`;
+        if (typeof window[funcName] === 'function') window[funcName]();
+    }
 
-    // 6. Scroll
+    // 6. Smooth Scroll
     if (isCvSub) {
         document.getElementById(section)?.scrollIntoView({ behavior: 'smooth' });
     } else {
