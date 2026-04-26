@@ -2,6 +2,16 @@ document.addEventListener('DOMContentLoaded', () => {
     formatNavItems();
     renderWhoami();
     
+    const urlParams = new URLSearchParams(window.location.search);
+    const sectionFromUrl = urlParams.get('section');
+    
+    if (sectionFromUrl) {
+        const targetBtn = document.querySelector(`nav button[data-section="${sectionFromUrl}"]`);
+        if (targetBtn) {
+            targetBtn.click();
+        }
+    }
+    
     // UI Elements
     const menuToggle = document.getElementById('menu-toggle');
     const overlay = document.getElementById('mobile-nav-overlay');
