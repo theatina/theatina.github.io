@@ -1,3 +1,6 @@
+// --- Global State Variables ---
+let terminalActive = false;
+
 document.addEventListener('DOMContentLoaded', () => {
     formatNavItems();
     renderWhoami();
@@ -176,6 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function initTerminal() {
+    terminalActive = true;
     const display = document.getElementById('terminal-display');
     const path = "theatina@portfolio:~$ ";
     const wait = (ms) => new Promise(res => setTimeout(res, ms));
@@ -204,6 +208,8 @@ async function initTerminal() {
         const textPool = shuffle([...rawPool]);
 
         for (let sentence of textPool) {
+            if (!terminalActive) break;
+            
             // 1. Typing
             for (let i = 0; i <= sentence.length; i++) {
                 // Simulate a backspace typo
@@ -217,13 +223,10 @@ async function initTerminal() {
                 await wait(Math.random() * 60 + 40);
             }
 
-            await wait(3000); // Read time
-
-            // 2. Disappear by backspacing the whole sentence
-            for (let i = sentence.length; i >= 0; i--) {
-                cmdSpan.textContent = sentence.substring(0, i);
-                await wait(30); // Eraser speed
-            }
+            // 2. Wait for 5 seconds instead of backspacing
+            await wait(5000);
+            // 3. Clear instantly
+            cmdSpan.textContent = "";
             
             await wait(500); // Pause before next sentence
         }
@@ -232,6 +235,7 @@ async function initTerminal() {
 
 // Ensure the CTA button navigates to the 'whoami' section
 document.querySelector('.cta-btn').addEventListener('click', () => {
+    // document.querySelector('nav button[data-section="whoami"]').click();
     navigateTo('whoami');
 });
 
@@ -271,10 +275,11 @@ function navigateTo(section) {
 
     // 2. Handle Landing Page Layout
     if (section === 'landing') {
+        terminalActive = false; // Stop any previous loop
+        initTerminal();
         document.body.classList.add('landing-page');
         aside.style.display = 'none';
         main.style.marginLeft = '0';
-        initTerminal();
     } 
     // 3. Handle Other Pages (Mobile vs Desktop logic)
     else {
@@ -310,7 +315,7 @@ function navigateTo(section) {
 
     // 5. Trigger Rendering (Cleaned up logic)
     if (displayId === 'landing') {
-        // initTerminal(); // REMOVE OR COMMENT OUT THIS LINE
+        initTerminal(); 
     } else if (displayId === 'cv') {
         renderMasterCv();
     } else {
@@ -324,6 +329,14 @@ function navigateTo(section) {
     } else {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+
+    const newUrl = section === 'landing' ? '/' : `/?section=${section}`;
+    
+    // Only push to history if it's different from the current URL
+    if (window.location.search !== (section === 'landing' ? '' : `?section=${section}`)) {
+        history.pushState({ section: section }, "", newUrl);
+    }
+
 }
 
 function renderWhoami() {
