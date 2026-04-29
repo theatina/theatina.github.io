@@ -296,6 +296,7 @@ body.landing-page {
 }
 
 body.landing-page aside { display: none !important; }
+body.landing-page .menu-toggle { display: none !important; }
 body.landing-page main {
     margin-left: 0 !important;
     width: 100% !important;
