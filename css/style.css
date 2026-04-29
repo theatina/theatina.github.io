@@ -139,14 +139,14 @@ nav button:hover, nav button.active { background: rgba(41, 128, 185, 0.08); colo
 
 /* --- Title & Subtitle Styling --- */
 .landing-center-wrapper h1 {
-    font-size: 2rem;
+    font-size: 2.5rem;
     margin-bottom: 0rem;
     color: var(--text-dark);
     text-shadow: 2px 2px 4px rgba(0,0,0,0.1); /* Subtle shadow */
 }
 
 .landing-center-wrapper .subtitle {
-    font-size: 1rem;
+    font-size: 1.5rem;
     color: var(--text-light); /* Lighter grey */
     margin-top: 0rem; 
     margin-bottom: 1rem;
@@ -154,7 +154,7 @@ nav button:hover, nav button.active { background: rgba(41, 128, 185, 0.08); colo
 }
 
 .landing-socials {
-    font-size: 1rem;
+    font-size: 1.2rem;
     display: flex;
     gap: 25px;
     margin: 3px 0 5px 0;
@@ -180,7 +180,7 @@ nav button:hover, nav button.active { background: rgba(41, 128, 185, 0.08); colo
     background: #0d1117;
     border: 1px solid #30363d;
     border-radius: 10px;
-    padding: 25px;
+    padding: 25px 50px;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -201,7 +201,7 @@ nav button:hover, nav button.active { background: rgba(41, 128, 185, 0.08); colo
 /* --- 2. Terminal Styling --- */
 .terminal-line {
     font-family: 'JetBrains Mono', 'Fira Code', monospace;
-    font-size: 0.8rem;
+    font-size: 1rem;
     white-space: nowrap;
     display: block;
     width: 100%;
@@ -228,10 +228,10 @@ nav button:hover, nav button.active { background: rgba(41, 128, 185, 0.08); colo
 /* Container for the terminal */
 #terminal-display {
     width: 100%;
-    max-width: 600px;
+    max-width: 550px;
     margin: 20px auto;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 1rem;
+    font-size: 1.1rem;
     color: var(--text-dark);
     display: block; /* Change from grid to block */
     text-align: left;
@@ -749,6 +749,46 @@ html {
     body {
         flex-direction: column;
         overflow-x: hidden;
+        font-size: 0.85rem;
+    }
+
+    h1 {
+        font-size: 1.5rem !important; /* Smaller main titles */
+    }
+
+    h2, h3 {
+        font-size: 1.2rem !important; /* Smaller section headings */
+    }
+
+    .landing-center-wrapper .subtitle {
+        font-size: 0.9rem !important;
+        margin-bottom: 0.5rem !important;
+    }
+
+    /* Shrink the social icons and their spacing */
+    .landing-socials {
+        font-size: 0.9rem;      /* Scaled down from 1.2rem (approx 83%) */
+        gap: 20px;              /* Scaled down from 25px (approx 80%) */
+        margin: 4px 0 4px 0;    /* Scaled down proportionally */
+    }
+
+    /* Scale the Button */
+    .cta-btn {
+        font-size: 0.8rem;      /* Scaled down from 0.95rem (approx 84%) */
+        padding: 8px 16px;      /* Scaled down from 10/20px (80% of original) */
+        margin-top: 16px;       /* Scaled down from 20px (80%) */
+        margin-bottom: 24px;    /* Scaled down from 30px (80%) */
+        letter-spacing: 1px;    /* Scaled down slightly to match font */
+    }
+
+    /* Adjusting terminal font for mobile */
+    .terminal-line, .cmd, .path {
+        font-size: 0.8rem !important;
+    }
+
+    /* Terminal window height reduction for mobile to prevent overflow */
+    .terminal-window {
+        height: 140px !important;
     }
 
     /* Prevent body jitter during nav open */
