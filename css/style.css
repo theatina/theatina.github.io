@@ -314,16 +314,21 @@ body.landing-page main {
 main {
     padding: 60px 80px;
     width: 100%;
-    max-width: 1000px;
-    margin: 0 auto;
+    /* Ensure no unwanted margins */
+    margin: 0 auto; 
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* This centers everything inside main horizontally */
+    min-height: 100vh;
 }
 
 /* Sidebar state (Desktop only, only when not on landing page) */
 @media (min-width: 851px) {
     body:not(.landing-page) main {
-        margin-left: 260px;
+        margin-left: 260px; /* Leave space for the sidebar */
         width: calc(100% - 260px);
+        align-items: center; /* Centers the content */
     }
 }
 
