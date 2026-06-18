@@ -84,6 +84,7 @@ function updateArchive() {
     let newCount = 0; 
     let updatedCount = 0;      
     let deletedCount = 0; 
+    let errorCount = 0; // Added tracker for formatting errors
 
     // Count how many files actually got removed from the live site this run
     deletedIds.forEach(id => {
@@ -122,6 +123,28 @@ function updateArchive() {
                 fileModified = true; 
             }
 
+            // --- FORMATTING VALIDATION ---
+            // Extract title and text to ensure the file isn't empty or missing a title
+            const lines = body.split('\n');
+            const titleLine = lines.find(line => line.startsWith('#'));
+            const title = titleLine ? titleLine.replace(/^#\s*/, '').trim() : '';
+            const text = lines.filter(line => line !== titleLine).join('\n').trim();
+
+            const isBadFormat = !title || !text; // Fails if missing H1 or body content
+
+            if (isUnpublished && isBadFormat) {
+                // If the file is badly formatted, append _error (if it doesn't have it already)
+                if (!file.includes('_error')) {
+                    const newName = file.replace(/\.md$/, '_error.md');
+                    fs.renameSync(filePath, path.join(dir, newName));
+                }
+                errorCount++;
+                processedCount++;
+                drawProgressBar(processedCount, totalFiles, `| New: ${newCount} | Upd: ${updatedCount} | Err: ${errorCount}`);
+                return; // Skip adding to the database or publishing
+            }
+            // -----------------------------
+
             if (!frontmatter.id) {
                 const idMatchFilename = file.match(/_([a-zA-Z0-9-]+)\.md$/);
                 frontmatter.id = (idMatchFilename && idMatchFilename[1]) || crypto.randomBytes(4).toString('hex');
@@ -131,7 +154,7 @@ function updateArchive() {
             // --- DELETION CHECK ---
             if (deletedIds.has(frontmatter.id)) {
                 processedCount++;
-                drawProgressBar(processedCount, totalFiles, `| New: ${newCount} | Updated: ${updatedCount} | Deleted: ${deletedCount}`);
+                drawProgressBar(processedCount, totalFiles, `| New: ${newCount} | Upd: ${updatedCount} | Del: ${deletedCount} | Err: ${errorCount}`);
                 return; 
             }
 
@@ -178,11 +201,6 @@ function updateArchive() {
                 ? tagsMatch[1].split(',').map(tag => tag.trim()).filter(tag => tag !== '') 
                 : [];
 
-            const lines = body.split('\n');
-            const titleLine = lines.find(line => line.startsWith('#'));
-            const title = titleLine ? titleLine.replace(/^#\s*/, '').trim() : 'Untitled';
-            const text = lines.filter(line => line !== titleLine).join('\n').trim();
-
             uniquePostsMap.set(frontmatter.id, {
                 id: frontmatter.id,
                 title: title,
@@ -200,7 +218,7 @@ function updateArchive() {
             }
 
             processedCount++;
-            drawProgressBar(processedCount, totalFiles, `| New: ${newCount} | Updated: ${updatedCount} | Deleted: ${deletedCount}`);
+            drawProgressBar(processedCount, totalFiles, `| New: ${newCount} | Upd: ${updatedCount} | Del: ${deletedCount} | Err: ${errorCount}`);
         });
     };
 
@@ -220,6 +238,7 @@ function updateArchive() {
     console.log(`✨ New Posts Published:  ${newCount}`);
     console.log(`📝 Existing Posts Updated: ${updatedCount}`);
     console.log(`🗑️  Deleted Posts:         ${deletedCount}`);
+    console.log(`⚠️  Format Errors Skipped: ${errorCount}`);
     console.log(`📚 Total Live Posts:       ${uniquePosts.length}`);
 }
 
