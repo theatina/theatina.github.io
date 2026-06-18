@@ -26,7 +26,6 @@ jobs:
           node-version: '20'
 
       - name: Get changed files and statuses
-        id: changed
         run: |
           before="${{ github.event.before }}"
           after="${{ github.sha }}"
@@ -37,9 +36,8 @@ jobs:
             git --no-pager diff --name-status "$before" "$after" > /tmp/changes.tsv || true
           fi
 
-          echo "changes<<EOF" >> "$GITHUB_OUTPUT"
-          cat /tmp/changes.tsv >> "$GITHUB_OUTPUT"
-          echo "EOF" >> "$GITHUB_OUTPUT"
+          echo "Changes written to /tmp/changes.tsv"
+          ls -l /tmp/changes.tsv || true
 
       - name: Verify head commit message is 'publish' (case-insensitive)
         run: |
@@ -56,14 +54,13 @@ jobs:
 
       - name: Require at least one new top-level unpublished .md file
         run: |
-          changes="${{ steps.changed.outputs.changes }}"
-          if [ -z "$changes" ]; then
-            echo "No changes detected; exiting."
+          if [ ! -f /tmp/changes.tsv ]; then
+            echo "/tmp/changes.tsv not found; exiting."
             exit 0
           fi
 
           found=false
-          while IFS= read -r line; do
+          while IFS= read -r line || [ -n "$line" ]; do
             [ -z "$line" ] && continue
             status=$(printf "%s" "$line" | awk '{print $1}')
             file=$(printf "%s" "$line" | cut -f2- | sed 's/^\t//')
@@ -72,9 +69,7 @@ jobs:
               found=true
               break
             fi
-          done <<EOF
-$changes
-EOF
+          done < /tmp/changes.tsv
 
           if [ "$found" != "true" ]; then
             echo "No newly added top-level unpublished .md found; skipping job."
@@ -83,13 +78,9 @@ EOF
           echo "Found at least one new unpublished top-level .md — proceeding."
 
       - name: Run update_archive.js and capture output
-        id: run_archive
         run: |
           echo "Running js/update_archive.js (CWD: $(pwd))"
           node js/update_archive.js 2>&1 | tee /tmp/update_output.txt
-          echo "output<<EOF" >> "$GITHUB_OUTPUT"
-          cat /tmp/update_output.txt >> "$GITHUB_OUTPUT"
-          echo "EOF" >> "$GITHUB_OUTPUT"
 
       - name: Commit and push changes if any (include update output in commit body)
         if: always()
