@@ -1243,3 +1243,33 @@ html {
     color: #000000;
     transform: translateY(-3px); /* Subtle lift */
 }
+
+/* ==========================================================================
+   Mobile-Only Hidden Gem (Next to Socials)
+   ========================================================================== */
+.mobile-gem {
+    opacity: 0;                  /* Completely hidden normally */
+    margin-left: 20px;           /* Spaced a bit further out */
+    color: var(--accent) !important; /* Forces the exact blue accent */
+    text-decoration: none;
+    font-size: 1.2rem;           /* Matches the desktop gem size */
+    transform: scale(0.8);       /* Starts slightly shrunken */
+    transition: opacity 0.3s ease, transform 0.3s ease, text-shadow 0.3s ease;
+    cursor: pointer;
+}
+
+/* Mimics the hover/active states of the original gemstone */
+.mobile-gem:active,
+.mobile-gem:focus,
+.mobile-gem:hover {
+    opacity: 1 !important;       /* Becomes fully visible */
+    transform: scale(1.1);       /* Pops up in size slightly */
+    text-shadow: 0 0 8px rgba(41, 128, 185, 0.6); /* Adds the blue glow */
+}
+
+/* Hide this specific gem on desktop so it doesn't duplicate your bottom trigger */
+@media (min-width: 851px) {
+    .mobile-gem {
+        display: none !important;
+    }
+}
