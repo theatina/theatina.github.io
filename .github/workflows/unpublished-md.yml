@@ -1,0 +1,125 @@
+name: Run update_archive on new unpublished markdown files
+
+# allow pushing changes made by the workflow
+permissions:
+  contents: write
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'assets/raw/writings/unpublished/*.md'
+
+jobs:
+  run-update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Get changed files and statuses
+        id: changed
+        run: |
+          before="${{ github.event.before }}"
+          after="${{ github.sha }}"
+
+          if [ "$before" = "0000000000000000000000000000000000000000" ]; then
+            # initial push — treat all files in the tree as additions (A)
+            git ls-tree -r --name-only "$after" | sed 's/^/A\t/' > /tmp/changes.tsv
+          else
+            git --no-pager diff --name-status "$before" "$after" > /tmp/changes.tsv || true
+          fi
+
+          echo "changes<<EOF" >> "$GITHUB_OUTPUT"
+          cat /tmp/changes.tsv >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Verify head commit message is 'publish' (case-insensitive)
+        run: |
+          msg="${{ github.event.head_commit.message }}"
+          if [ -z "$msg" ]; then
+            echo "No head commit message found; skipping job."
+            exit 0
+          fi
+          echo "Head commit message: '$msg'"
+          if ! printf "%s" "$msg" | grep -i -xq 'publish'; then
+            echo "Commit message is not exactly 'publish' (case-insensitive); skipping job."
+            exit 0
+          fi
+
+      - name: Require at least one new top-level unpublished .md file
+        run: |
+          changes="${{ steps.changed.outputs.changes }}"
+          if [ -z "$changes" ]; then
+            echo "No changes detected; exiting."
+            exit 0
+          fi
+
+          found=false
+          while IFS= read -r line; do
+            [ -z "$line" ] && continue
+            status=$(printf "%s" "$line" | awk '{print $1}')
+            file=$(printf "%s" "$line" | cut -f2- | sed 's/^\t//')
+
+            if [ "$status" = "A" ] && printf "%s" "$file" | grep -Eq '^assets/raw/writings/unpublished/[^/]+\.md$'; then
+              found=true
+              break
+            fi
+          done <<EOF
+$changes
+EOF
+
+          if [ "$found" != "true" ]; then
+            echo "No newly added top-level unpublished .md found; skipping job."
+            exit 0
+          fi
+          echo "Found at least one new unpublished top-level .md — proceeding."
+
+      - name: Run update_archive.js and capture output
+        id: run_archive
+        run: |
+          echo "Running js/update_archive.js (CWD: $(pwd))"
+          # capture stdout+stderr to a file and print it
+          node js/update_archive.js 2>&1 | tee /tmp/update_output.txt
+          echo "output<<EOF" >> "$GITHUB_OUTPUT"
+          cat /tmp/update_output.txt >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Commit and push changes if any (include update output in commit body)
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # stage all changes produced by the script
+          git add -A
+
+          # exit if no changes to commit
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          # prepare commit message with subject and script output in the body
+          printf "Content Update\n\nupdate_archive.js output:\n\n" > /tmp/commit_msg.txt
+          # append captured output if present
+          if [ -f /tmp/update_output.txt ]; then
+            cat /tmp/update_output.txt >> /tmp/commit_msg.txt
+          else
+            echo "(no output captured)" >> /tmp/commit_msg.txt
+          fi
+
+          # commit and push
+          git commit -F /tmp/commit_msg.txt
+          git push origin HEAD:main
