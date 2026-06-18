@@ -831,15 +831,28 @@ html {
     aside {
         width: 100%;
         height: auto;
-        position: relative; /* This is the magic line that fixes the overlap */
+        position: relative; 
         border-right: none;
         border-bottom: 1px solid var(--border);
-        padding: 20px;
+        padding: 15px 20px; /* Reduced top/bottom padding to make it less tall */
         box-sizing: border-box;
+    }
+
+    /* 2. Tighten up the text spacing inside the mobile sidebar */
+    aside p {
+        margin-bottom: 15px; /* Reduces the gap below your subtitle */
+    }
+
+    aside nav {
+        display: none;
     }
     
     aside.active {
         display: flex; /* Shown when class is added */
+    }
+
+    .gemstone-trigger { 
+        display: none !important;
     }
 
     main {
