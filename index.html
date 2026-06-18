@@ -61,6 +61,13 @@
             <!-- <button data-section="writing">Writing</button> -->
             <!-- <button data-section="music">Music</button> -->
         </nav>
+
+        <!-- Hidden Gemstone Trigger Zone -->
+        <div class="gemstone-trigger" onclick="openWritingsModal()">
+            <!-- Using fa-diamond which works perfectly with Font Awesome 4.7 -->
+            <i class="fa fa-diamond gemstone-icon" title="Writings Archive"></i>
+        </div>
+
     </aside>
 
     <main>
@@ -102,17 +109,26 @@
         <section id="research" class="section"><h2>Research</h2><div id="research-grid" class="grid"></div></section>
         <section id="writing" class="section"><h2>Writing</h2><div id="writing-list" class="grid"></div></section>
         <section id="music" class="section"><h2>Music</h2><div id="music-list" class="grid"></div></section>
-    </main>
+</main>
 
     <button id="back-to-top" title="Go to top">↑</button>
+    
     <div class="mobile-nav-overlay" id="mobile-nav-overlay">
         <div class="close-nav" id="close-nav">&times;</div>
-        <nav>
-            </nav>
+        <nav></nav>
     </div>
 
+    <div id="writingsModal" class="writings-modal" onclick="closeWritingsModal(event)">
+        <div class="writings-modal-content">
+            <span class="writings-close" onclick="document.getElementById('writingsModal').style.display='none'; document.body.style.overflow=''">&times;</span>
+            <h2>The Notebook Archive</h2>
+            <div class="writings-grid" id="writingsGrid"></div>
+            <button id="modal-scroll-up" onclick="resetModalScroll()"><i class="fa fa-arrow-up"></i></button>
+        </div>
+    </div>
+
+    <script src="js/archive_data.js"></script>
     <script src="js/data.js"></script>
     <script src="js/main.js"></script>
-    
 </body>
 </html>

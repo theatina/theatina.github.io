@@ -284,19 +284,39 @@ const CV_DATA = {
         }
     ],
 
-    writing: [
-        { 
-            title: "title", 
-            desc: "description", 
-            link: "#" 
-        }
-    ],
-
     music: [
         { 
             title: "title", 
             desc: "description", 
             type: "type" 
+        }
+    ],
+
+    writing: [
+        {
+            title: "I had a dream",
+            desc: "I saw a man.\nA man that I actually don't like.\nIt's weird, you know, because in my dream I wanted him.\nI really wanted him in a strange way.\nI woke up and I was thinking of him.",
+            date: "June 2013"
+        },
+        {
+            title: "We all begin as strangers",
+            desc: "Every single relationship was firstly absolutely nothing.\nIt is just a step one took. One hasn't hesitated to fall down and they did move.\nThe end of it is a step too.\nWhat does count, is the middle of it. The most interesting part..",
+            date: "June 2013"
+        },
+        {
+            title: "Distance: Missing or Forgetting ?",
+            desc: "I miss. I miss people. I miss people when they are away.\nI even miss myself when people I love are away.\nI can live alone, I don't need them.\nBut I want them in my life, no matter where they are.",
+            date: "June 2013"
+        },
+        {
+            title: "The Pursuit of Happiness",
+            desc: "Drinking a cup of chocospresso (as I call the new hot beverage I use to make almost every morning!), listening to my favourite songs, making plans for the day maybe.\nI like that. Especially when it \"contains\" friends, lovers...",
+            date: "June 2013"
+        },
+        {
+            title: "Ένας κόσμος εδώ, ένας παραπέρα...",
+            desc: "Μια ματιά στο δρόμο... και ήδη έχεις δει κόσμους να περπατούν, να μιλούν, να λυπούνται και να χαίρονται. Ένα φιλί, μια αγκαλιά, θυμός, κλάματα. Μητέρα, αδελφός, παππούς, νύφη.\nΌσο βρίσκονται στη στάση του λεωφορείου κάτι κάνουν...",
+            date: "December 2013"
         }
     ]
 };

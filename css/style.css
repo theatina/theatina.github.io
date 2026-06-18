@@ -22,6 +22,30 @@ aside {
 aside h1 { font-size: 1.8rem; color: var(--accent); font-weight: 700; margin-top: 10px; margin-bottom: 1px; }
 aside p { font-size: 0.85rem; color: var(--text-light); margin-bottom: 30px; }
 
+/* Internal scrolling container rules for the navigation buttons */
+aside nav { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 8px; 
+    
+    overflow-y: auto;          /* Turns on vertical scrolling inside the button area only */
+    max-height: calc(100vh - 310px); /* Dynamically shrinks navigation space so elements don't drop off-screen */
+    padding-right: 4px;        /* Adds breathing room on the right side next to the scroll line */
+    padding-bottom: 55px;
+}
+
+/* Add an elegant, custom-themed minimalist scrollbar for the sidebar */
+aside nav::-webkit-scrollbar {
+    width: 3px;
+}
+aside nav::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 2px;
+}
+aside nav:hover::-webkit-scrollbar-thumb {
+    background: var(--border); /* Scroll trace becomes visible only when a reader hovers over navigation */
+}
+
 .sidebar-contact { display: flex; gap: 15px; margin-bottom: 35px; }
 .sidebar-contact a { color: var(--text-dark); font-size: 1rem; text-decoration: none; transition: 0.2s; }
 .sidebar-contact a:hover { color: var(--accent); transform: translateY(-2px); }
@@ -805,13 +829,16 @@ html {
     }
 
     aside {
-        width: 100%;
-        height: auto;
-        position: relative; /* Remove fixed positioning */
-        border-right: none;
-        border-bottom: 1px solid var(--border);
-        padding: 20px;
-        box-sizing: border-box;
+        width: 260px; 
+        height: 100vh; 
+        background: var(--sidebar-bg);
+        position: fixed; 
+        border-right: 1px solid var(--border);
+        padding: 30px 20px; 
+        display: flex; 
+        flex-direction: column; 
+        z-index: 100;
+        box-sizing: border-box; /* Crucial to prevent padding from expanding past 260px width */
     }
 
     main {
@@ -916,4 +943,289 @@ html {
 
 .flash-active {
     animation: temporary-flash 1s ease-out;
+}
+
+/* ==========================================================================
+   Hidden Gemstone Navigation Trigger & Modal Display Layer
+   ========================================================================== */
+
+.gemstone-trigger {
+    margin-top: auto; /* Pushes the gemstone area down */
+    padding: 30px 0;
+    text-align: center;
+    cursor: pointer;
+    min-height: 50px; /* Gives you a clear area to hover over */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    z-index: 105; /* Ensures it sits above other sidebar elements */
+}
+
+/* Force standard text fallback if Font Awesome icon fails to render */
+.gemstone-icon {
+    font-size: 1.2rem;
+    color: #2980b9 !important; /* Force the exact blue accent color */
+    opacity: 0 !important; /* Completely hidden normally */
+    transform: scale(0.8);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Make it highly visible ONLY when someone hovers over the blank zone */
+.gemstone-trigger:hover .gemstone-icon {
+    opacity: 0.7 !important;
+    transform: scale(1.1);
+}
+
+.gemstone-trigger:hover .gemstone-icon:hover {
+    opacity: 1 !important;
+    text-shadow: 0 0 8px rgba(41, 128, 185, 0.6);
+}
+
+/* --- Clean Pop-up Overlay Container Styles --- */
+.writings-modal {
+    display: none;
+    position: fixed;
+    z-index: 99999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    background-color: rgba(248, 249, 250, 0.98); 
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.writings-modal-content {
+    margin: 6% auto;
+    padding: 40px;
+    width: 85%;
+    max-width: 1100px;
+    box-sizing: border-box;
+    animation: fadeIn 0.4s ease-out;
+}
+
+.writings-modal-content h2 {
+    color: #2c3e50;
+    border-bottom: 1px solid #edf2f7;
+    font-size: 1.0rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    padding-bottom: 15px;
+    margin-top: 0;
+    margin-bottom: 40px;
+}
+
+.writings-close {
+    color: #7f8c8d;
+    float: right;
+    font-size: 2rem;
+    font-weight: 300;
+    cursor: pointer;
+    line-height: 0.8;
+    transition: color 0.2s ease;
+}
+
+.writings-close:hover {
+    color: #2c3e50;
+}
+
+.writings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+}
+
+.writing-card {
+    background: #ffffff;
+    border: 1px solid #edf2f7;
+    border-radius: 8px;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    box-sizing: border-box;
+    aspect-ratio: 1 / 1; 
+}
+
+.writing-card .card-meta {
+    font-size: 0.75rem;
+    color: #7f8c8d;
+    margin-bottom: 10px;
+    font-family: monospace;
+}
+
+.writing-card h3 {
+    font-size: 1.15rem;
+    margin: 0 0 15px 0;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.writing-card p {
+    font-size: 0.9rem;
+    color: #4a5568;
+    line-height: 1.6;
+    margin: 0;
+    overflow-y: auto;
+    white-space: pre-line; 
+}
+
+.writing-card p::-webkit-scrollbar {
+    width: 4px;
+}
+.writing-card p::-webkit-scrollbar-thumb {
+    background: #edf2f7;
+    border-radius: 4px;
+}
+
+/* Mobile Overrides */
+@media (max-width: 850px) {
+    .gemstone-trigger {
+        margin: 15px 0;
+        min-height: auto;
+    }
+    .gemstone-icon {
+        opacity: 0.5 !important; /* Visible on mobile */
+    }
+    .writings-modal-content {
+        margin: 20% auto;
+        padding: 20px;
+    }
+    .writing-card {
+        aspect-ratio: auto;
+        min-height: 250px;
+    }
+}
+
+/* ==========================================================================
+   Minimal Markdown Reader Workspace UI Aesthetics
+   ========================================================================== */
+
+.markdown-reader-body {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 10px 0 50px 0;
+    animation: fadeIn 0.2s ease-out forwards;
+}
+
+.reader-meta {
+    font-family: monospace;
+    font-size: 0.8rem;
+    color: var(--text-light);
+    margin-bottom: 25px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 10px;
+}
+
+.plaintext-render-content {
+    white-space: pre-wrap;
+    font-size: 0.95rem;       /* Reduced from 1.05rem for a tighter look */
+    line-height: 1.6;        /* Slightly tighter line-height for smaller text */
+    color: var(--text-dark);
+    letter-spacing: 0.2px;
+}
+
+.plaintext-render-content strong {
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.plaintext-render-content blockquote {
+    border-left: 3px solid var(--accent);
+    padding-left: 18px;
+    margin: 25px 0;
+    font-style: italic;
+    color: var(--text-light);
+}
+
+.plaintext-render-content ul {
+    padding-left: 20px;
+}
+
+.plaintext-render-content li {
+    margin-bottom: 8px;
+}
+
+.plaintext-render-content p {
+    margin: 0 0 1.2rem 0; /* Adjust the 1.2rem to make gaps smaller or larger */
+    line-height: 1.6;
+}
+
+.reader-back-btn {
+    margin-top: 50px;
+    background: none;
+    border: 1px solid var(--border);
+    padding: 10px 22px;
+    border-radius: 4px;
+    color: var(--text-dark);
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-family: inherit;
+    transition: all 0.2s ease;
+}
+
+.reader-back-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(41, 128, 185, 0.02);
+}
+
+/* Integrated Nav Trail Breadcrumbs */
+.breadcrumb-back {
+    font-weight: 300;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    transition: opacity 0.2s;
+}
+
+.breadcrumb-back:hover {
+    opacity: 0.7;
+    text-decoration: underline;
+}
+
+.breadcrumb-separator {
+    color: var(--text-light);
+    font-weight: 300;
+    margin: 0 10px;
+    opacity: 0.3;
+}
+
+.read-more-trigger {
+    font-size: 0.8rem;
+    color: var(--accent);
+    margin-top: auto;
+    font-weight: 600;
+    display: inline-block;
+    padding-top: 10px;
+}
+
+#modal-scroll-up {
+    position: sticky;
+    bottom: 25px;
+    float: right;
+    margin-right: 20px;
+    
+    /* Mirroring your 'backToTopBtn' style */
+    background: #ffffff;
+    color: #4a4a4a;        /* Archive dark grey */
+    border: 1px solid #e0e0e0;
+    border-radius: 50%;    /* Circular shape */
+    width: 42px;
+    height: 42px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: none;         /* Hidden until scroll */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    z-index: 9999;
+}
+
+#modal-scroll-up:hover {
+    background: #fdfdfd;
+    border-color: #bbbbbb;
+    color: #000000;
+    transform: translateY(-3px); /* Subtle lift */
 }
