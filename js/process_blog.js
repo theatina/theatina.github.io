@@ -1,5 +1,25 @@
 const fs = require('fs');
 const cheerio = require('cheerio');
+const crypto = require('crypto');
+
+// --- Helper: Get Exact Local Time ---
+function getLocalIsoString() {
+    const date = new Date();
+    const tzo = -date.getTimezoneOffset();
+    const dif = tzo >= 0 ? '+' : '-';
+    const pad = num => {
+        const norm = Math.floor(Math.abs(num));
+        return (norm < 10 ? '0' : '') + norm;
+    };
+    return date.getFullYear() +
+        '-' + pad(date.getMonth() + 1) +
+        '-' + pad(date.getDate()) +
+        'T' + pad(date.getHours()) +
+        ':' + pad(date.getMinutes()) +
+        ':' + pad(date.getSeconds()) +
+        dif + pad(tzo / 60) +
+        ':' + pad(tzo % 60);
+}
 
 const rawData = fs.readFileSync(
     'assets/raw/MyBlogExport_Dicts.json',
@@ -7,7 +27,6 @@ const rawData = fs.readFileSync(
 );
 
 const blogPosts = JSON.parse(rawData);
-
 
 function cleanContent(html) {
     const $ = cheerio.load(html);
@@ -59,17 +78,26 @@ function cleanContent(html) {
 
 const formattedData = blogPosts
     .filter(post => post.status === 'LIVE')
-    .map(post => ({
-        title: post.title,
-        date: post.published
-            ? post.published.split('T')[0]
-            : 'Unknown Date',
-        text: cleanContent(post.content?.value || '')
-    }))
-    .sort((a, b) => new Date(b.date) - new Date(a.date));
+    .map(post => {
+        // Use the original Blogger publish date, or local time if missing
+        const fullTime = post.published || getLocalIsoString();
+        const generatedId = crypto.randomBytes(4).toString('hex');
+        
+        return {
+            id: generatedId,
+            title: post.title,
+            created: fullTime,
+            updated: fullTime,
+            date: fullTime.split('T')[0], // Clean date for the frontend array
+            category: 'General',
+            tags: [],
+            text: cleanContent(post.content?.value || '')
+        };
+    })
+    .sort((a, b) => new Date(b.created) - new Date(a.created));
 
 const output =
-    `const ARCHIVE_DATA = ${JSON.stringify(formattedData, null, 4)};`;
+    `const ARCHIVE_DATA = ${JSON.stringify(formattedData, null, 4)};\n`;
 
 fs.writeFileSync('js/archive_data.js', output);
 

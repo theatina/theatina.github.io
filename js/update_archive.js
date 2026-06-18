@@ -1,53 +1,226 @@
 const fs = require('fs');
-const { execSync } = require('child_process');
+const path = require('path');
+const crypto = require('crypto');
 
 const OUTPUT_FILE = 'js/archive_data.js';
-const WRITINGS_DIR = 'assets/raw/writings';
+const PUBLISHED_DIR = 'assets/raw/writings/published';
+const UNPUBLISHED_DIR = 'assets/raw/writings/unpublished';
+const DELETED_DIR = 'assets/raw/writings/deleted'; 
+
+// --- Helper: Get Exact Local Time with Timezone Offset ---
+function getLocalIsoString() {
+    const date = new Date();
+    const tzo = -date.getTimezoneOffset();
+    const dif = tzo >= 0 ? '+' : '-';
+    const pad = num => {
+        const norm = Math.floor(Math.abs(num));
+        return (norm < 10 ? '0' : '') + norm;
+    };
+    return date.getFullYear() +
+        '-' + pad(date.getMonth() + 1) +
+        '-' + pad(date.getDate()) +
+        'T' + pad(date.getHours()) +
+        ':' + pad(date.getMinutes()) +
+        ':' + pad(date.getSeconds()) +
+        dif + pad(tzo / 60) +
+        ':' + pad(tzo % 60);
+}
+
+// --- Helper: Progress Bar ---
+function drawProgressBar(current, total, text = '') {
+    const width = 30; 
+    const percent = total === 0 ? 1 : current / total;
+    const filledLength = Math.round(width * percent);
+    const bar = '█'.repeat(filledLength) + '░'.repeat(width - filledLength);
+    const percentText = Math.round(percent * 100).toString().padStart(3, ' ');
+
+    process.stdout.write(`\r\x1b[KProgress: [${bar}] ${percentText}% (${current}/${total}) ${text}`);
+    if (current === total && total > 0) console.log(); 
+}
 
 function updateArchive() {
-    console.log("--- Starting Blog Update ---");
+    console.log("--- Starting Archive Compile & Publish ---");
 
-    // 1. Rerun original script if it exists
-    if (fs.existsSync('js/process_blog.js')) {
-        try {
-            console.log("Running original export script...");
-            execSync('node js/process_blog.js', { stdio: 'inherit' });
-        } catch (e) {
-            console.error("Original script failed, proceeding with manual merge...");
-        }
-    }
-
-    // 2. Now perform the merging of Markdown
-    let allPosts = [];
-    if (fs.existsSync(OUTPUT_FILE)) {
-        const fileContent = fs.readFileSync(OUTPUT_FILE, 'utf8');
-        const jsonString = fileContent.substring(fileContent.indexOf('['), fileContent.lastIndexOf(']') + 1);
-        allPosts = JSON.parse(jsonString);
-    }
-
-    // 3. Process Markdown (same as before)
-    const files = fs.readdirSync(WRITINGS_DIR).filter(f => f.endsWith('.md'));
-    files.forEach(file => {
-        const content = fs.readFileSync(WRITINGS_DIR + '/' + file, 'utf8');
-        const match = content.match(/^---\n.*?date:\s*(\d{4}-\d{2}-\d{2})/s);
-        const date = match ? match[1] : new Date().toISOString().split('T')[0];
-        const body = content.replace(/^---[\s\S]*?---\n?/, '').trim();
-        const lines = body.split('\n');
-
-        allPosts.push({
-            title: lines[0].replace(/^#\s*/, '').trim(),
-            date: date,
-            text: lines.slice(1).join('\n').trim()
-        });
+    [PUBLISHED_DIR, UNPUBLISHED_DIR, DELETED_DIR].forEach(dir => {
+        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     });
 
-    // 4. De-duplicate and Sort
-    const uniquePosts = Array.from(new Map(allPosts.map(p => [p.title, p])).values());
-    uniquePosts.sort((a, b) => new Date(b.date) - new Date(a.date));
+    let knownIds = new Set();
+    if (fs.existsSync(OUTPUT_FILE)) {
+        try {
+            const content = fs.readFileSync(OUTPUT_FILE, 'utf8');
+            const jsonStr = content.substring(content.indexOf('['), content.lastIndexOf(']') + 1);
+            const parsed = JSON.parse(jsonStr);
+            parsed.forEach(p => knownIds.add(p.id));
+        } catch (e) {}
+    }
 
-    // 5. Save
-    fs.writeFileSync(OUTPUT_FILE, `const ARCHIVE_DATA = ${JSON.stringify(uniquePosts, null, 4)};`);
-    console.log(`Update complete. Total posts: ${uniquePosts.length}`);
+    const deletedIds = new Set();
+    const deletedFiles = fs.readdirSync(DELETED_DIR).filter(f => f.endsWith('.md'));
+    
+    deletedFiles.forEach(file => {
+        const filePath = path.join(DELETED_DIR, file);
+        const content = fs.readFileSync(filePath, 'utf8');
+        
+        const fmMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+        let id = null;
+        if (fmMatch) {
+            const idMatch = fmMatch[1].match(/^id:\s*([a-zA-Z0-9-]+)/m);
+            if (idMatch) id = idMatch[1].trim();
+        }
+        if (!id) {
+            const idMatchFilename = file.match(/_([a-zA-Z0-9-]+)\.md$/);
+            if (idMatchFilename) id = idMatchFilename[1];
+        }
+        if (id) deletedIds.add(id);
+    });
+
+    const uniquePostsMap = new Map();
+    const publishedFiles = fs.readdirSync(PUBLISHED_DIR).filter(f => f.endsWith('.md'));
+    const unpublishedFiles = fs.readdirSync(UNPUBLISHED_DIR).filter(f => f.endsWith('.md'));
+    const totalFiles = publishedFiles.length + unpublishedFiles.length;
+    
+    let processedCount = 0;
+    let newCount = 0; 
+    let updatedCount = 0;      
+    let deletedCount = 0; 
+
+    // Count how many files actually got removed from the live site this run
+    deletedIds.forEach(id => {
+        if (knownIds.has(id)) deletedCount++;
+    });
+
+    if (totalFiles === 0 && deletedIds.size === 0) {
+        console.log("No markdown files found. Exiting.");
+        return;
+    }
+
+    if (totalFiles > 0) drawProgressBar(0, totalFiles, "Starting...");
+
+    const processFiles = (files, dir, isUnpublished) => {
+        files.forEach(file => {
+            const filePath = path.join(dir, file);
+            let content = fs.readFileSync(filePath, 'utf8');
+            let fileModified = false;
+            
+            const now = getLocalIsoString();
+
+            // Smart Frontmatter Parser
+            let frontmatter = {};
+            let body = content;
+            const fmMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+            
+            if (fmMatch) {
+                fmMatch[1].split('\n').forEach(line => {
+                    const [key, ...valParts] = line.split(':');
+                    if (key && valParts.length) {
+                        frontmatter[key.trim()] = valParts.join(':').trim();
+                    }
+                });
+                body = content.slice(fmMatch[0].length).trim();
+            } else {
+                fileModified = true; 
+            }
+
+            if (!frontmatter.id) {
+                const idMatchFilename = file.match(/_([a-zA-Z0-9-]+)\.md$/);
+                frontmatter.id = (idMatchFilename && idMatchFilename[1]) || crypto.randomBytes(4).toString('hex');
+                fileModified = true;
+            }
+
+            // --- DELETION CHECK ---
+            if (deletedIds.has(frontmatter.id)) {
+                processedCount++;
+                drawProgressBar(processedCount, totalFiles, `| New: ${newCount} | Updated: ${updatedCount} | Deleted: ${deletedCount}`);
+                return; 
+            }
+
+            if (!frontmatter.created) {
+                frontmatter.created = frontmatter.date || now;
+                fileModified = true;
+            }
+            delete frontmatter.date; 
+
+            if (isUnpublished) {
+                frontmatter.updated = now;
+                fileModified = true;
+            } else {
+                if (!frontmatter.updated) {
+                    frontmatter.updated = frontmatter.created;
+                    fileModified = true;
+                }
+            }
+
+            if (!frontmatter.category) { frontmatter.category = 'General'; fileModified = true; }
+            if (!frontmatter.tags) { frontmatter.tags = '[]'; fileModified = true; }
+
+            // --- LOGGING TRACKER ---
+            const isKnownPost = knownIds.has(frontmatter.id);
+            if (isUnpublished) {
+                if (isKnownPost) {
+                    updatedCount++; 
+                } else {
+                    newCount++; 
+                }
+            } else if (fileModified) {
+                updatedCount++; 
+            }
+
+            if (fileModified || isUnpublished) {
+                const newFmBlock = `---\nid: ${frontmatter.id}\ncreated: ${frontmatter.created}\nupdated: ${frontmatter.updated}\ncategory: ${frontmatter.category}\ntags: ${frontmatter.tags}\n---\n\n`;
+                content = newFmBlock + body;
+                
+                fs.writeFileSync(filePath, content, 'utf8');
+            }
+
+            const tagsMatch = frontmatter.tags.match(/\[(.*?)\]/);
+            const tags = tagsMatch && tagsMatch[1] 
+                ? tagsMatch[1].split(',').map(tag => tag.trim()).filter(tag => tag !== '') 
+                : [];
+
+            const lines = body.split('\n');
+            const titleLine = lines.find(line => line.startsWith('#'));
+            const title = titleLine ? titleLine.replace(/^#\s*/, '').trim() : 'Untitled';
+            const text = lines.filter(line => line !== titleLine).join('\n').trim();
+
+            uniquePostsMap.set(frontmatter.id, {
+                id: frontmatter.id,
+                title: title,
+                created: frontmatter.created,
+                updated: frontmatter.updated,
+                date: frontmatter.updated.split('T')[0], 
+                category: frontmatter.category,
+                tags: tags,
+                text: text
+            });
+
+            if (isUnpublished) {
+                const newPath = path.join(PUBLISHED_DIR, file);
+                fs.renameSync(filePath, newPath);
+            }
+
+            processedCount++;
+            drawProgressBar(processedCount, totalFiles, `| New: ${newCount} | Updated: ${updatedCount} | Deleted: ${deletedCount}`);
+        });
+    };
+
+    processFiles(publishedFiles, PUBLISHED_DIR, false);
+    processFiles(unpublishedFiles, UNPUBLISHED_DIR, true);
+
+    const uniquePosts = Array.from(uniquePostsMap.values());
+    uniquePosts.sort((a, b) => new Date(b.updated) - new Date(a.updated));
+
+    const outputDir = path.dirname(OUTPUT_FILE);
+    if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
+
+    const outputString = `const ARCHIVE_DATA = ${JSON.stringify(uniquePosts, null, 4)};\n`;
+    fs.writeFileSync(OUTPUT_FILE, outputString);
+    
+    console.log(`\n✅ Compile complete!`);
+    console.log(`✨ New Posts Published:  ${newCount}`);
+    console.log(`📝 Existing Posts Updated: ${updatedCount}`);
+    console.log(`🗑️  Deleted Posts:         ${deletedCount}`);
+    console.log(`📚 Total Live Posts:       ${uniquePosts.length}`);
 }
 
 updateArchive();
