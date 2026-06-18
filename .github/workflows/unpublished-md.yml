@@ -1,6 +1,5 @@
 name: Run update_archive on new unpublished markdown files
 
-# allow pushing changes made by the workflow
 permissions:
   contents: write
 
@@ -33,7 +32,6 @@ jobs:
           after="${{ github.sha }}"
 
           if [ "$before" = "0000000000000000000000000000000000000000" ]; then
-            # initial push — treat all files in the tree as additions (A)
             git ls-tree -r --name-only "$after" | sed 's/^/A\t/' > /tmp/changes.tsv
           else
             git --no-pager diff --name-status "$before" "$after" > /tmp/changes.tsv || true
@@ -88,7 +86,6 @@ EOF
         id: run_archive
         run: |
           echo "Running js/update_archive.js (CWD: $(pwd))"
-          # capture stdout+stderr to a file and print it
           node js/update_archive.js 2>&1 | tee /tmp/update_output.txt
           echo "output<<EOF" >> "$GITHUB_OUTPUT"
           cat /tmp/update_output.txt >> "$GITHUB_OUTPUT"
@@ -102,24 +99,19 @@ EOF
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          # stage all changes produced by the script
           git add -A
 
-          # exit if no changes to commit
           if git diff --cached --quiet; then
             echo "No changes to commit."
             exit 0
           fi
 
-          # prepare commit message with subject and script output in the body
           printf "Content Update\n\nupdate_archive.js output:\n\n" > /tmp/commit_msg.txt
-          # append captured output if present
           if [ -f /tmp/update_output.txt ]; then
             cat /tmp/update_output.txt >> /tmp/commit_msg.txt
           else
             echo "(no output captured)" >> /tmp/commit_msg.txt
           fi
 
-          # commit and push
           git commit -F /tmp/commit_msg.txt
           git push origin HEAD:main
