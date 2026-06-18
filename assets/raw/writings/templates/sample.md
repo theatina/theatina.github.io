@@ -1,6 +1,8 @@
 ---
-date: 2026-06-18
+category: 
+tags: []
 ---
-# Your Article Title Here
+# Title
 
-Your article content goes here. You can use markdown like **bold**, *italics*, or lists.
+Article text, supporting markdown formatting, e.g. **bold**, _italic_, 
+- lists, etc.
