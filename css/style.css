@@ -829,16 +829,17 @@ html {
     }
 
     aside {
-        width: 260px; 
-        height: 100vh; 
-        background: var(--sidebar-bg);
-        position: fixed; 
-        border-right: 1px solid var(--border);
-        padding: 30px 20px; 
-        display: flex; 
-        flex-direction: column; 
-        z-index: 100;
-        box-sizing: border-box; /* Crucial to prevent padding from expanding past 260px width */
+        width: 100%;
+        height: auto;
+        position: relative; /* This is the magic line that fixes the overlap */
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        padding: 20px;
+        box-sizing: border-box;
+    }
+    
+    aside.active {
+        display: flex; /* Shown when class is added */
     }
 
     main {
