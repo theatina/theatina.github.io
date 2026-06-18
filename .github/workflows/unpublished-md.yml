@@ -26,30 +26,43 @@ jobs:
           node-version: '20'
 
       - name: Get changed files and statuses
+        id: changed
         run: |
           before="${{ github.event.before }}"
           after="${{ github.sha }}"
 
           if [ "$before" = "0000000000000000000000000000000000000000" ]; then
+            # initial push — treat all files in the tree as additions (A)
             git ls-tree -r --name-only "$after" | sed 's/^/A\t/' > /tmp/changes.tsv
           else
             git --no-pager diff --name-status "$before" "$after" > /tmp/changes.tsv || true
           fi
 
           echo "Changes written to /tmp/changes.tsv"
-          ls -l /tmp/changes.tsv || true
+          # expose basic step outputs for counts if needed (not used in heredoc)
+          echo "changes=written" >> "$GITHUB_OUTPUT"
 
-      - name: Verify head commit message is 'publish' (case-insensitive)
+      - name: Verify commit messages include 'publish' (case-insensitive)
         run: |
-          msg="${{ github.event.head_commit.message }}"
-          if [ -z "$msg" ]; then
-            echo "No head commit message found; skipping job."
-            exit 0
-          fi
-          echo "Head commit message: '$msg'"
-          if ! printf "%s" "$msg" | grep -i -xq 'publish'; then
-            echo "Commit message is not exactly 'publish' (case-insensitive); skipping job."
-            exit 0
+          event_file="${GITHUB_EVENT_PATH:-/github/workflow/event.json}"
+          if [ -f "$event_file" ] && command -v jq >/dev/null 2>&1; then
+            if jq -r '.commits[].message' "$event_file" | grep -i -xq 'publish'; then
+              echo "Found 'publish' in commit messages."
+            else
+              echo "No commit message equals 'publish' (case-insensitive); skipping job."
+              exit 0
+            fi
+          else
+            # fallback to head commit check
+            msg="${{ github.event.head_commit.message }}"
+            if [ -z "$msg" ]; then
+              echo "No head commit message found; skipping job."
+              exit 0
+            fi
+            if ! printf "%s" "$msg" | grep -i -xq 'publish'; then
+              echo "Commit message is not exactly 'publish' (case-insensitive); skipping job."
+              exit 0
+            fi
           fi
 
       - name: Require at least one new top-level unpublished .md file
@@ -64,7 +77,6 @@ jobs:
             [ -z "$line" ] && continue
             status=$(printf "%s" "$line" | awk '{print $1}')
             file=$(printf "%s" "$line" | cut -f2- | sed 's/^\t//')
-
             if [ "$status" = "A" ] && printf "%s" "$file" | grep -Eq '^assets/raw/writings/unpublished/[^/]+\.md$'; then
               found=true
               break
@@ -75,14 +87,39 @@ jobs:
             echo "No newly added top-level unpublished .md found; skipping job."
             exit 0
           fi
+
           echo "Found at least one new unpublished top-level .md — proceeding."
 
-      - name: Run update_archive.js and capture output
+      - name: Record counts before
+        id: counts
+        run: |
+          mkdir -p assets/raw/writings/published
+          mkdir -p assets/raw/writings/unpublished
+          published_before=$(ls -1 assets/raw/writings/published/*.md 2>/dev/null | wc -l)
+          unpublished_before=$(ls -1 assets/raw/writings/unpublished/*.md 2>/dev/null | wc -l)
+          echo "published_before=$published_before" >> "$GITHUB_OUTPUT"
+          echo "unpublished_before=$unpublished_before" >> "$GITHUB_OUTPUT"
+
+      - name: Run update_archive.js
         run: |
           echo "Running js/update_archive.js (CWD: $(pwd))"
-          node js/update_archive.js 2>&1 | tee /tmp/update_output.txt
+          node js/update_archive.js
 
-      - name: Commit and push changes if any (include update output in commit body)
+      - name: Compute published-added
+        id: compute
+        run: |
+          published_before=${{ steps.counts.outputs.published_before }}
+          unpublished_before=${{ steps.counts.outputs.unpublished_before }}
+
+          published_after=$(ls -1 assets/raw/writings/published/*.md 2>/dev/null | wc -l)
+          published_added=$((published_after - published_before))
+          if [ "$published_added" -lt 0 ]; then published_added=0; fi
+
+          echo "published_after=$published_after" >> "$GITHUB_OUTPUT"
+          echo "published_added=$published_added" >> "$GITHUB_OUTPUT"
+          echo "unpublished_before=$unpublished_before" >> "$GITHUB_OUTPUT"
+
+      - name: Commit and push changes if any (include published count only)
         if: always()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -97,12 +134,15 @@ jobs:
             exit 0
           fi
 
-          printf "Content Update\n\nupdate_archive.js output:\n\n" > /tmp/commit_msg.txt
-          if [ -f /tmp/update_output.txt ]; then
-            cat /tmp/update_output.txt >> /tmp/commit_msg.txt
-          else
-            echo "(no output captured)" >> /tmp/commit_msg.txt
-          fi
+          published_before="${{ steps.counts.outputs.published_before }}"
+          unpublished_before="${{ steps.counts.outputs.unpublished_before }}"
+          published_after="${{ steps.compute.outputs.published_after }}"
+          published_added="${{ steps.compute.outputs.published_added }}"
+
+          printf "Content Update\n\n" > /tmp/commit_msg.txt
+          printf "Published %s file(s) from assets/raw/writings/unpublished to assets/raw/writings/published.\n\n" "$published_added" >> /tmp/commit_msg.txt
+          printf "Counts:\n- Unpublished (before): %s\n- Published (before): %s\n- Published (after): %s\n" \
+            "$unpublished_before" "$published_before" "$published_after" >> /tmp/commit_msg.txt
 
           git commit -F /tmp/commit_msg.txt
           git push origin HEAD:main
