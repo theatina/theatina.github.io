@@ -1,0 +1,184 @@
+name: Run update_archive on new unpublished markdown files
+
+permissions:
+  contents: write
+
+on:
+  push:
+    branches:
+      - 'dev/*'
+    paths:
+      - 'assets/raw/writings/unpublished/*.md'
+
+jobs:
+  run-update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Get changed files and statuses (top-level .md only)
+        id: changed
+        run: |
+          before="${{ github.event.before }}"
+          after="${{ github.sha }}"
+
+          if [ "$before" = "0000000000000000000000000000000000000000" ]; then
+            git ls-tree -r --name-only "$after" \
+              | grep -E '^assets/raw/writings/unpublished/[^/]+\.md$' \
+              | sed 's/^/A\t/' > /tmp/changes.tsv || true
+          else
+            git --no-pager diff --name-status "$before" "$after" \
+              | grep -E '\tassets/raw/writings/unpublished/[^/]+\.md$' > /tmp/changes.tsv || true
+          fi
+
+          echo "Changes written to /tmp/changes.tsv"
+          echo "changes=written" >> "$GITHUB_OUTPUT"
+
+      - name: Verify commit messages include 'publish' (case-insensitive)
+        run: |
+          event_file="${GITHUB_EVENT_PATH:-/github/workflow/event.json}"
+          if [ -f "$event_file" ] && command -v jq >/dev/null 2>&1; then
+            if jq -r '.commits[].message' "$event_file" | grep -i -xq 'publish'; then
+              echo "Found 'publish' in commit messages."
+            else
+              echo "No commit message equals 'publish' (case-insensitive); skipping job."
+              exit 0
+            fi
+          else
+            msg="${{ github.event.head_commit.message }}"
+            if [ -z "$msg" ]; then
+              echo "No head commit message found; skipping job."
+              exit 0
+            fi
+            if ! printf "%s" "$msg" | grep -i -xq 'publish'; then
+              echo "Commit message is not exactly 'publish' (case-insensitive); skipping job."
+              exit 0
+            fi
+          fi
+
+      - name: Require at least one new top-level unpublished .md file
+        run: |
+          if [ ! -f /tmp/changes.tsv ]; then
+            echo "/tmp/changes.tsv not found; exiting."
+            exit 0
+          fi
+
+          found=false
+          while IFS= read -r line || [ -n "$line" ]; do
+            [ -z "$line" ] && continue
+            status=$(printf "%s" "$line" | awk '{print $1}')
+            file=$(printf "%s" "$line" | cut -f2- | sed 's/^\t//')
+            if [ "$status" = "A" ] && printf "%s" "$file" | grep -Eq '^assets/raw/writings/unpublished/[^/]+\.md$'; then
+              found=true
+              break
+            fi
+          done < /tmp/changes.tsv
+
+          if [ "$found" != "true" ]; then
+            echo "No newly added top-level unpublished .md found; skipping job."
+            exit 0
+          fi
+
+          echo "Found at least one new unpublished top-level .md — proceeding."
+
+      - name: Record counts before
+        id: counts
+        run: |
+          mkdir -p assets/raw/writings/published
+          mkdir -p assets/raw/writings/unpublished
+          published_before=$(ls -1 assets/raw/writings/published/*.md 2>/dev/null | wc -l)
+          unpublished_before=$(ls -1 assets/raw/writings/unpublished/*.md 2>/dev/null | wc -l)
+          echo "published_before=$published_before" >> "$GITHUB_OUTPUT"
+          echo "unpublished_before=$unpublished_before" >> "$GITHUB_OUTPUT"
+
+      - name: Run update_archive.js
+        run: |
+          echo "Running js/update_archive.js (CWD: $(pwd))"
+          node js/update_archive.js
+
+      - name: Compute published-added and unpublished remaining
+        id: compute
+        run: |
+          published_before=${{ steps.counts.outputs.published_before }}
+          unpublished_before=${{ steps.counts.outputs.unpublished_before }}
+
+          published_after=$(ls -1 assets/raw/writings/published/*.md 2>/dev/null | wc -l)
+          unpublished_after=$(ls -1 assets/raw/writings/unpublished/*.md 2>/dev/null | wc -l)
+
+          published_added=$((published_after - published_before))
+          if [ "$published_added" -lt 0 ]; then published_added=0; fi
+
+          echo "published_after=$published_after" >> "$GITHUB_OUTPUT"
+          echo "published_added=$published_added" >> "$GITHUB_OUTPUT"
+          echo "unpublished_before=$unpublished_before" >> "$GITHUB_OUTPUT"
+          echo "unpublished_after=$unpublished_after" >> "$GITHUB_OUTPUT"
+
+      - name: Commit and push changes if any (include counts only)
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add -A
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          published_before="${{ steps.counts.outputs.published_before }}"
+          unpublished_before="${{ steps.counts.outputs.unpublished_before }}"
+          published_after="${{ steps.compute.outputs.published_after }}"
+          published_added="${{ steps.compute.outputs.published_added }}"
+          unpublished_after="${{ steps.compute.outputs.unpublished_after }}"
+
+          printf "Content Update\n\n" > /tmp/commit_msg.txt
+          printf "Published %s file(s) from assets/raw/writings/unpublished to assets/raw/writings/published.\n\n" "$published_added" >> /tmp/commit_msg.txt
+          printf "Counts:\n- Unpublished (before): %s\n- Published (before): %s\n- Published (after): %s\n- Unpublished (after, may contain errors): %s\n" \
+            "$unpublished_before" "$published_before" "$published_after" "$unpublished_after" >> /tmp/commit_msg.txt
+
+          BRANCH="${GITHUB_REF#refs/heads/}"
+          git commit -F /tmp/commit_msg.txt
+          git push origin "HEAD:${BRANCH}"
+
+      - name: Create PR from branch -> main (always create)
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # install jq if missing
+          if ! command -v jq >/dev/null 2>&1; then
+            sudo apt-get update -y
+            sudo apt-get install -y jq
+          fi
+
+          OWNER="${GITHUB_REPOSITORY%/*}"
+          REPO="${GITHUB_REPOSITORY#*/}"
+          BRANCH="${GITHUB_REF#refs/heads/}"
+          PR_TITLE="Content Update — ${BRANCH}"
+
+          # build payload using the commit message file as the body
+          payload=$(jq -n --arg title "$PR_TITLE" --arg head "$BRANCH" --arg base "main" --rawfile body /tmp/commit_msg.txt \
+            '{title:$title, head:$head, base:$base, body:$body}')
+
+          resp=$(curl -s -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: application/json" \
+            -d "$payload" "https://api.github.com/repos/${OWNER}/${REPO}/pulls")
+
+          pr_url=$(echo "$resp" | jq -r .html_url)
+          if [ "$pr_url" = "null" ] || [ -z "$pr_url" ]; then
+            echo "Failed to create PR: $resp"
+            exit 1
+          fi
+
+          echo "Created PR: $pr_url"
