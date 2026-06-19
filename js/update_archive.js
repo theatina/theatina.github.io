@@ -55,6 +55,9 @@ function updateArchive() {
         } catch (e) {}
     }
 
+    // Master Set to track EVERY used ID to guarantee uniqueness
+    const allUsedIds = new Set(knownIds);
+
     const deletedIds = new Set();
     const deletedFiles = fs.readdirSync(DELETED_DIR).filter(f => f.endsWith('.md'));
     
@@ -72,10 +75,15 @@ function updateArchive() {
             const idMatchFilename = file.match(/_([a-zA-Z0-9-]+)\.md$/);
             if (idMatchFilename) id = idMatchFilename[1];
         }
-        if (id) deletedIds.add(id);
+        if (id) {
+            deletedIds.add(id);
+            allUsedIds.add(id); // Register deleted IDs so we don't accidentally reuse them
+        }
     });
 
     const uniquePostsMap = new Map();
+    const publishedFilesMap = new Map(); 
+    
     const publishedFiles = fs.readdirSync(PUBLISHED_DIR).filter(f => f.endsWith('.md'));
     const unpublishedFiles = fs.readdirSync(UNPUBLISHED_DIR).filter(f => f.endsWith('.md'));
     const totalFiles = publishedFiles.length + unpublishedFiles.length;
@@ -84,9 +92,8 @@ function updateArchive() {
     let newCount = 0; 
     let updatedCount = 0;      
     let deletedCount = 0; 
-    let errorCount = 0; // Added tracker for formatting errors
+    let errorCount = 0; 
 
-    // Count how many files actually got removed from the live site this run
     deletedIds.forEach(id => {
         if (knownIds.has(id)) deletedCount++;
     });
@@ -106,7 +113,6 @@ function updateArchive() {
             
             const now = getLocalIsoString();
 
-            // Smart Frontmatter Parser
             let frontmatter = {};
             let body = content;
             const fmMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
@@ -123,17 +129,20 @@ function updateArchive() {
                 fileModified = true; 
             }
 
+            // Register existing ID so we don't duplicate it in this run
+            if (frontmatter.id) {
+                allUsedIds.add(frontmatter.id);
+            }
+
             // --- FORMATTING VALIDATION ---
-            // Extract title and text to ensure the file isn't empty or missing a title
             const lines = body.split('\n');
             const titleLine = lines.find(line => line.startsWith('#'));
             const title = titleLine ? titleLine.replace(/^#\s*/, '').trim() : '';
             const text = lines.filter(line => line !== titleLine).join('\n').trim();
 
-            const isBadFormat = !title || !text; // Fails if missing H1 or body content
+            const isBadFormat = !title || !text; 
 
             if (isUnpublished && isBadFormat) {
-                // If the file is badly formatted, append _error (if it doesn't have it already)
                 if (!file.includes('_error')) {
                     const newName = file.replace(/\.md$/, '_error.md');
                     fs.renameSync(filePath, path.join(dir, newName));
@@ -141,15 +150,29 @@ function updateArchive() {
                 errorCount++;
                 processedCount++;
                 drawProgressBar(processedCount, totalFiles, `| New: ${newCount} | Upd: ${updatedCount} | Err: ${errorCount}`);
-                return; // Skip adding to the database or publishing
+                return; 
             }
             // -----------------------------
 
+            // --- GUARANTEED UNIQUE ID GENERATION ---
             if (!frontmatter.id) {
                 const idMatchFilename = file.match(/_([a-zA-Z0-9-]+)\.md$/);
-                frontmatter.id = (idMatchFilename && idMatchFilename[1]) || crypto.randomBytes(4).toString('hex');
+                
+                if (idMatchFilename && idMatchFilename[1]) {
+                    frontmatter.id = idMatchFilename[1];
+                } else {
+                    let newId;
+                    // Keep generating a new ID until we find one that has NEVER been used
+                    do {
+                        newId = crypto.randomBytes(4).toString('hex');
+                    } while (allUsedIds.has(newId));
+                    
+                    frontmatter.id = newId;
+                }
                 fileModified = true;
             }
+            // Track the newly confirmed ID so the next file doesn't grab it
+            allUsedIds.add(frontmatter.id);
 
             // --- DELETION CHECK ---
             if (deletedIds.has(frontmatter.id)) {
@@ -180,7 +203,7 @@ function updateArchive() {
             // --- LOGGING TRACKER ---
             const isKnownPost = knownIds.has(frontmatter.id);
             if (isUnpublished) {
-                if (isKnownPost) {
+                if (isKnownPost || publishedFilesMap.has(frontmatter.id)) {
                     updatedCount++; 
                 } else {
                     newCount++; 
@@ -212,9 +235,22 @@ function updateArchive() {
                 text: text
             });
 
-            if (isUnpublished) {
+            // Map tracking and moving logic
+            if (!isUnpublished) {
+                publishedFilesMap.set(frontmatter.id, file); 
+            } else {
+                const existingFile = publishedFilesMap.get(frontmatter.id);
+                
+                if (existingFile && existingFile !== file) {
+                    try {
+                        fs.unlinkSync(path.join(PUBLISHED_DIR, existingFile));
+                    } catch (e) {
+                        console.error(`Failed to delete old file: ${existingFile}`);
+                    }
+                }
+                
                 const newPath = path.join(PUBLISHED_DIR, file);
-                fs.renameSync(filePath, newPath);
+                fs.renameSync(filePath, newPath); 
             }
 
             processedCount++;
