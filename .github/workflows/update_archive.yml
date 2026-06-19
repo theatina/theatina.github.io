@@ -6,7 +6,7 @@ permissions:
 on:
   push:
     branches:
-      - main
+      - 'dev/*'
     paths:
       - 'assets/raw/writings/unpublished/*.md'
 
@@ -25,17 +25,19 @@ jobs:
         with:
           node-version: '24'
 
-      - name: Get changed files and statuses
+      - name: Get changed files and statuses (top-level .md only)
         id: changed
         run: |
           before="${{ github.event.before }}"
           after="${{ github.sha }}"
 
           if [ "$before" = "0000000000000000000000000000000000000000" ]; then
-            # initial push — treat all files in the tree as additions (A)
-            git ls-tree -r --name-only "$after" | sed 's/^/A\t/' > /tmp/changes.tsv
+            git ls-tree -r --name-only "$after" \
+              | grep -E '^assets/raw/writings/unpublished/[^/]+\.md$' \
+              | sed 's/^/A\t/' > /tmp/changes.tsv || true
           else
-            git --no-pager diff --name-status "$before" "$after" > /tmp/changes.tsv || true
+            git --no-pager diff --name-status "$before" "$after" \
+              | grep -E '\tassets/raw/writings/unpublished/[^/]+\.md$' > /tmp/changes.tsv || true
           fi
 
           echo "Changes written to /tmp/changes.tsv"
@@ -52,7 +54,6 @@ jobs:
               exit 0
             fi
           else
-            # fallback to head commit check
             msg="${{ github.event.head_commit.message }}"
             if [ -z "$msg" ]; then
               echo "No head commit message found; skipping job."
@@ -121,7 +122,7 @@ jobs:
           echo "unpublished_before=$unpublished_before" >> "$GITHUB_OUTPUT"
           echo "unpublished_after=$unpublished_after" >> "$GITHUB_OUTPUT"
 
-      - name: Commit and push changes if any (include published + unpublished counts)
+      - name: Commit and push changes if any (include counts only)
         if: always()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -147,5 +148,37 @@ jobs:
           printf "Counts:\n- Unpublished (before): %s\n- Published (before): %s\n- Published (after): %s\n- Unpublished (after, may contain errors): %s\n" \
             "$unpublished_before" "$published_before" "$published_after" "$unpublished_after" >> /tmp/commit_msg.txt
 
+          BRANCH="${GITHUB_REF#refs/heads/}"
           git commit -F /tmp/commit_msg.txt
-          git push origin HEAD:main
+          git push origin "HEAD:${BRANCH}"
+
+      - name: Create PR from branch -> main (always create)
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # install jq if missing
+          if ! command -v jq >/dev/null 2>&1; then
+            sudo apt-get update -y
+            sudo apt-get install -y jq
+          fi
+
+          OWNER="${GITHUB_REPOSITORY%/*}"
+          REPO="${GITHUB_REPOSITORY#*/}"
+          BRANCH="${GITHUB_REF#refs/heads/}"
+          PR_TITLE="Content Update — ${BRANCH}"
+
+          # build payload using the commit message file as the body
+          payload=$(jq -n --arg title "$PR_TITLE" --arg head "$BRANCH" --arg base "main" --rawfile body /tmp/commit_msg.txt \
+            '{title:$title, head:$head, base:$base, body:$body}')
+
+          resp=$(curl -s -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: application/json" \
+            -d "$payload" "https://api.github.com/repos/${OWNER}/${REPO}/pulls")
+
+          pr_url=$(echo "$resp" | jq -r .html_url)
+          if [ "$pr_url" = "null" ] || [ -z "$pr_url" ]; then
+            echo "Failed to create PR: $resp"
+            exit 1
+          fi
+
+          echo "Created PR: $pr_url"
