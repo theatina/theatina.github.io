@@ -23,7 +23,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Get changed files and statuses
         id: changed
@@ -39,7 +39,6 @@ jobs:
           fi
 
           echo "Changes written to /tmp/changes.tsv"
-          # expose basic step outputs for counts if needed (not used in heredoc)
           echo "changes=written" >> "$GITHUB_OUTPUT"
 
       - name: Verify commit messages include 'publish' (case-insensitive)
@@ -105,21 +104,24 @@ jobs:
           echo "Running js/update_archive.js (CWD: $(pwd))"
           node js/update_archive.js
 
-      - name: Compute published-added
+      - name: Compute published-added and unpublished remaining
         id: compute
         run: |
           published_before=${{ steps.counts.outputs.published_before }}
           unpublished_before=${{ steps.counts.outputs.unpublished_before }}
 
           published_after=$(ls -1 assets/raw/writings/published/*.md 2>/dev/null | wc -l)
+          unpublished_after=$(ls -1 assets/raw/writings/unpublished/*.md 2>/dev/null | wc -l)
+
           published_added=$((published_after - published_before))
           if [ "$published_added" -lt 0 ]; then published_added=0; fi
 
           echo "published_after=$published_after" >> "$GITHUB_OUTPUT"
           echo "published_added=$published_added" >> "$GITHUB_OUTPUT"
           echo "unpublished_before=$unpublished_before" >> "$GITHUB_OUTPUT"
+          echo "unpublished_after=$unpublished_after" >> "$GITHUB_OUTPUT"
 
-      - name: Commit and push changes if any (include published count only)
+      - name: Commit and push changes if any (include published + unpublished counts)
         if: always()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -138,11 +140,12 @@ jobs:
           unpublished_before="${{ steps.counts.outputs.unpublished_before }}"
           published_after="${{ steps.compute.outputs.published_after }}"
           published_added="${{ steps.compute.outputs.published_added }}"
+          unpublished_after="${{ steps.compute.outputs.unpublished_after }}"
 
           printf "Content Update\n\n" > /tmp/commit_msg.txt
           printf "Published %s file(s) from assets/raw/writings/unpublished to assets/raw/writings/published.\n\n" "$published_added" >> /tmp/commit_msg.txt
-          printf "Counts:\n- Unpublished (before): %s\n- Published (before): %s\n- Published (after): %s\n" \
-            "$unpublished_before" "$published_before" "$published_after" >> /tmp/commit_msg.txt
+          printf "Counts:\n- Unpublished (before): %s\n- Published (before): %s\n- Published (after): %s\n- Unpublished (after, may contain errors): %s\n" \
+            "$unpublished_before" "$published_before" "$published_after" "$unpublished_after" >> /tmp/commit_msg.txt
 
           git commit -F /tmp/commit_msg.txt
           git push origin HEAD:main
