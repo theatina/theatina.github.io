@@ -9,8 +9,6 @@ on:
     branches:
       - 'dev'
       - 'dev/*'
-    paths:
-      - 'assets/raw/writings/unpublished/*.md'
 
 jobs:
   run-update:
@@ -27,32 +25,16 @@ jobs:
         with:
           node-version: '24'
 
-      - name: Get changed files and statuses (top-level .md only)
-        id: changed
-        run: |
-          before="${{ github.event.before }}"
-          after="${{ github.sha }}"
-
-          if [ "$before" = "0000000000000000000000000000000000000000" ]; then
-            git ls-tree -r --name-only "$after" \
-              | grep -E '^assets/raw/writings/unpublished/[^/]+\.md$' \
-              | sed 's/^/A\t/' > /tmp/changes.tsv || true
-          else
-            git --no-pager diff --name-status "$before" "$after" \
-              | grep -E '\tassets/raw/writings/unpublished/[^/]+\.md$' > /tmp/changes.tsv || true
-          fi
-
-          echo "Changes written to /tmp/changes.tsv"
-          echo "changes=written" >> "$GITHUB_OUTPUT"
-
-      - name: Verify commit messages include 'publish' (case-insensitive)
+      - name: Verify commit messages start with 'deploy' (case-insensitive)
         run: |
           event_file="${GITHUB_EVENT_PATH:-/github/workflow/event.json}"
+          # Match 'deploy' at the start of the message, followed by space, punctuation, or end-of-line.
+          # This avoids matching words like 'deploying'.
           if [ -f "$event_file" ] && command -v jq >/dev/null 2>&1; then
-            if jq -r '.commits[].message' "$event_file" | grep -i -xq 'publish'; then
-              echo "Found 'publish' in commit messages."
+            if jq -r '.commits[].message' "$event_file" | grep -i -E -q '^deploy([[:space:][:punct:]]|$)'; then
+              echo "Found a commit message starting with 'deploy'."
             else
-              echo "No commit message equals 'publish' (case-insensitive); skipping job."
+              echo "No commit message starts with 'deploy' (case-insensitive); skipping job."
               exit 0
             fi
           else
@@ -61,36 +43,11 @@ jobs:
               echo "No head commit message found; skipping job."
               exit 0
             fi
-            if ! printf "%s" "$msg" | grep -i -xq 'publish'; then
-              echo "Commit message is not exactly 'publish' (case-insensitive); skipping job."
+            if ! printf "%s" "$msg" | grep -i -E -q '^deploy([[:space:][:punct:]]|$)'; then
+              echo "Head commit message does not start with 'deploy' (case-insensitive); skipping job."
               exit 0
             fi
           fi
-
-      - name: Require at least one new top-level unpublished .md file
-        run: |
-          if [ ! -f /tmp/changes.tsv ]; then
-            echo "/tmp/changes.tsv not found; exiting."
-            exit 0
-          fi
-
-          found=false
-          while IFS= read -r line || [ -n "$line" ]; do
-            [ -z "$line" ] && continue
-            status=$(printf "%s" "$line" | awk '{print $1}')
-            file=$(printf "%s" "$line" | cut -f2- | sed 's/^\t//')
-            if [ "$status" = "A" ] && printf "%s" "$file" | grep -Eq '^assets/raw/writings/unpublished/[^/]+\.md$'; then
-              found=true
-              break
-            fi
-          done < /tmp/changes.tsv
-
-          if [ "$found" != "true" ]; then
-            echo "No newly added top-level unpublished .md found; skipping job."
-            exit 0
-          fi
-
-          echo "Found at least one new unpublished top-level .md — proceeding."
 
       - name: Record counts before
         id: counts

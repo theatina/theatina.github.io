@@ -1012,6 +1012,7 @@ html {
 }
 
 .writings-modal-content {
+    position: relative;
     margin: 6% auto;
     padding: 40px;
     width: 85%;
@@ -1028,7 +1029,7 @@ html {
     letter-spacing: 1.5px;
     padding-bottom: 15px;
     margin-top: 0;
-    margin-bottom: 40px;
+    margin-bottom: 45px;
 }
 
 .writings-close {
@@ -1055,7 +1056,7 @@ html {
     background: #ffffff;
     border: 1px solid #edf2f7;
     border-radius: 8px;
-    padding: 30px;
+    padding: 15px;
     display: flex;
     flex-direction: column;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
@@ -1066,7 +1067,7 @@ html {
 .writing-card .card-meta {
     font-size: 0.75rem;
     color: #7f8c8d;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
     font-family: monospace;
 }
 
@@ -1078,10 +1079,10 @@ html {
 }
 
 .writing-card p {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     color: #4a5568;
-    line-height: 1.6;
-    margin: 0;
+    line-height: 1.5;
+    margin: 20px 0px 10px 0px;
     overflow-y: auto;
     white-space: pre-line; 
 }
@@ -1124,13 +1125,19 @@ html {
     animation: fadeIn 0.2s ease-out forwards;
 }
 
+.reader-meta-group {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 10px;  /* space before post content */
+    margin-bottom: 20px;   /* larger gap to post */
+}
+
 .reader-meta {
     font-family: monospace;
     font-size: 0.8rem;
     color: var(--text-light);
-    margin-bottom: 25px;
+    margin-bottom: 1px;
     border-bottom: 1px solid var(--border);
-    padding-bottom: 10px;
+    padding-bottom: 5px;
 }
 
 .plaintext-render-content {
@@ -1186,6 +1193,51 @@ html {
     background: rgba(41, 128, 185, 0.02);
 }
 
+/* ==========================================================================
+   Archive Sorting Filter
+   ========================================================================== */
+.archive-header-row {
+    display: block; 
+}
+
+/* Pins the dropdown exactly under the X button */
+.archive-sort-wrapper {
+    position: absolute;
+    top: 85px;   
+    right: 40px; 
+    z-index: 10;
+    display: flex; /* NEW: Aligns the two dropdowns side-by-side */
+    gap: 10px;     /* NEW: Adds a nice gap between them */
+}
+
+.archive-sort-select {
+    padding: 6px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-dark);
+    background: #fff;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.8rem;
+    outline: none;
+    transition: all 0.2s ease;
+    /* text-transform: uppercase; */
+    letter-spacing: 0.5px;
+}
+
+.archive-sort-select:hover, 
+.archive-sort-select:focus {
+    border-color: var(--accent);
+}
+
+/* Mobile Adjustments */
+@media (max-width: 850px) {
+    .archive-sort-wrapper {
+        top: 60px;   /* Tighter spacing for mobile */
+        right: 20px; /* Matches your 20px mobile padding */
+    }
+}
+
 /* Integrated Nav Trail Breadcrumbs */
 .breadcrumb-back {
     font-weight: 300;
@@ -1214,6 +1266,22 @@ html {
     font-weight: 600;
     display: inline-block;
     padding-top: 10px;
+}
+
+/* --- Smooth Grid Sorting Animation --- */
+.writing-card {
+    animation: slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideUpFade {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 #modal-scroll-up {
