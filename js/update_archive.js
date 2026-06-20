@@ -213,7 +213,8 @@ function updateArchive() {
             }
 
             if (fileModified || isUnpublished) {
-                const newFmBlock = `---\nid: ${frontmatter.id}\ncreated: ${frontmatter.created}\nupdated: ${frontmatter.updated}\ncategory: ${frontmatter.category}\ntags: ${frontmatter.tags}\n---\n\n`;
+                // Removed unnecessary extra newlines at the end of the frontmatter block
+                const newFmBlock = `---\nid: ${frontmatter.id}\ncreated: ${frontmatter.created}\nupdated: ${frontmatter.updated}\ncategory: ${frontmatter.category}\ntags: ${frontmatter.tags}\n---\n`;
                 content = newFmBlock + body;
                 
                 fs.writeFileSync(filePath, content, 'utf8');
