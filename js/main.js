@@ -651,11 +651,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (modal && btn) {
         modal.addEventListener('scroll', function() {
-            // Check if we are in an article (Reader Mode)
-            // We check this by seeing if the 'writingsGrid' content has the 'markdown-reader-body' class
-            const isReaderMode = document.querySelector('.markdown-reader-body') !== null;
-            
-            if (isReaderMode && this.scrollTop > 300) {
+            // Simply show the button anytime the user scrolls down more than 300px
+            if (this.scrollTop > 300) {
                 btn.style.display = 'block';
             } else {
                 btn.style.display = 'none';
