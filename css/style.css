@@ -1105,8 +1105,9 @@ html {
         opacity: 0.5 !important; /* Visible on mobile */
     }
     .writings-modal-content {
-        margin: 20% auto;
-        padding: 20px;
+        margin: 15% auto;
+        padding: 20px 15px; /* Tightens the inner left/right padding slightly */
+        width: 95%;         /* Increases width, reducing the outer left/right margins */
     }
     .writings-modal-content h2 {
         margin-bottom: 15px; 
@@ -1140,7 +1141,8 @@ html {
     font-size: 0.8rem;
     color: var(--text-light);
     margin-bottom: 1px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px;
+    /* solid var(--border); */
     padding-bottom: 5px;
 }
 
