@@ -6,6 +6,7 @@ permissions:
 on:
   push:
     branches:
+      - 'dev'
       - 'dev/*'
     paths:
       - 'assets/raw/writings/unpublished/*.md'
@@ -34,7 +35,7 @@ jobs:
           if [ "$before" = "0000000000000000000000000000000000000000" ]; then
             git ls-tree -r --name-only "$after" \
               | grep -E '^assets/raw/writings/unpublished/[^/]+\.md$' \
-              | sed 's/^/A\t/' > /tmp/changes.tsv || true
+              | sed 's/^/A\\t/' > /tmp/changes.tsv || true
           else
             git --no-pager diff --name-status "$before" "$after" \
               | grep -E '\tassets/raw/writings/unpublished/[^/]+\.md$' > /tmp/changes.tsv || true
