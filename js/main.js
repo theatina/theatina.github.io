@@ -542,18 +542,28 @@ function renderArchiveGrid() {
 
     grid.innerHTML = filteredData.map((item) => {
         const rawText = item.text || '';
-        const truncatedRaw = rawText.length > 100 ? rawText.substring(0, 100) + '...' : rawText;
-        const excerpt = parseSimpleMarkdown(truncatedRaw);
+        
+        // 1. Strip Markdown to create a clean, plain-text string
+        let cleanText = rawText
+            .replace(/\*\*(.*?)\*\*/g, '$1')           // Remove ** but keep text
+            .replace(/\*(.*?)\*/g, '$1')               // Remove * but keep text
+            .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1') // Remove link syntax but keep text
+            .replace(/^[#>-]\s+/gm, '')                // Remove headers, quotes, list markers
+            .trim();
+
+        // 2. Truncate the clean text safely
+        const excerpt = cleanText.length > 100 ? cleanText.substring(0, 100) + '...' : cleanText;
 
         const displayDate = sortField === 'created' 
             ? item.created.split('T')[0] 
             : item.date;
 
+        // 3. Output the card (Note: we no longer use parseSimpleMarkdown here)
         return `
             <div class="writing-card" onclick="readArticle('${item.id}'); event.stopPropagation();">
                 <div class="card-meta">Published: ${displayDate}</div>
                 <h3>${item.title}</h3>
-                <p>${excerpt}...</p>
+                <p>${excerpt}</p>
             </div>
         `;
     }).join('');
