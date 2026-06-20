@@ -1,4 +1,4 @@
-name: Deploy new unpublished files to main (PR)
+name: Deploy from dev to main (PR only)
 
 permissions:
   contents: write
@@ -11,7 +11,7 @@ on:
       - 'dev/*'
 
 jobs:
-  run-update:
+  create-deploy-pr:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -20,24 +20,17 @@ jobs:
           fetch-depth: 0
           persist-credentials: true
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-
       - name: Verify commit messages start with 'deploy' (case-insensitive)
         id: verify
         run: |
           event_file="${GITHUB_EVENT_PATH:-/github/workflow/event.json}"
           deploy_found=false
 
-          # If event file exists and jq is available, check all commits in the push.
           if [ -f "$event_file" ] && command -v jq >/dev/null 2>&1; then
             if jq -r '.commits[].message' "$event_file" | grep -i -E -q '^deploy([[:space:][:punct:]]|$)'; then
               deploy_found=true
             fi
           else
-            # Fallback: use head_commit.message
             msg="${{ github.event.head_commit.message }}"
             if [ -n "$msg" ] && printf "%s" "$msg" | grep -i -E -q '^deploy([[:space:][:punct:]]|$)'; then
               deploy_found=true
@@ -51,93 +44,36 @@ jobs:
             echo "No commit message starting with 'deploy' found in this push."
           fi
 
-      - name: Record counts before
-        id: counts
-        run: |
-          mkdir -p assets/raw/writings/published
-          mkdir -p assets/raw/writings/unpublished
-          published_before=$(ls -1 assets/raw/writings/published/*.md 2>/dev/null | wc -l)
-          unpublished_before=$(ls -1 assets/raw/writings/unpublished/*.md 2>/dev/null | wc -l)
-          echo "published_before=$published_before" >> "$GITHUB_OUTPUT"
-          echo "unpublished_before=$unpublished_before" >> "$GITHUB_OUTPUT"
-
-      - name: Run update_archive.js
-        run: |
-          echo "Running js/update_archive.js (CWD: $(pwd))"
-          node js/update_archive.js
-
-      - name: Compute published-added and unpublished remaining
-        id: compute
-        run: |
-          published_before=${{ steps.counts.outputs.published_before }}
-          unpublished_before=${{ steps.counts.outputs.unpublished_before }}
-
-          published_after=$(ls -1 assets/raw/writings/published/*.md 2>/dev/null | wc -l)
-          unpublished_after=$(ls -1 assets/raw/writings/unpublished/*.md 2>/dev/null | wc -l)
-
-          published_added=$((published_after - published_before))
-          if [ "$published_added" -lt 0 ]; then published_added=0; fi
-
-          echo "published_after=$published_after" >> "$GITHUB_OUTPUT"
-          echo "published_added=$published_added" >> "$GITHUB_OUTPUT"
-          echo "unpublished_before=$unpublished_before" >> "$GITHUB_OUTPUT"
-          echo "unpublished_after=$unpublished_after" >> "$GITHUB_OUTPUT"
-
-      - name: Commit and push changes if any (include counts only)
-        id: commit_and_push
-        if: always()
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          git add -A
-
-          if git diff --cached --quiet; then
-            echo "No changes to commit."
-            echo "commit_made=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          published_before="${{ steps.counts.outputs.published_before }}"
-          unpublished_before="${{ steps.counts.outputs.unpublished_before }}"
-          published_after="${{ steps.compute.outputs.published_after }}"
-          published_added="${{ steps.compute.outputs.published_added }}"
-          unpublished_after="${{ steps.compute.outputs.unpublished_after }}"
-
-          printf "Content Update\n\n" > /tmp/commit_msg.txt
-          printf "Published %s file(s) from assets/raw/writings/unpublished to assets/raw/writings/published.\n\n" "$published_added" >> /tmp/commit_msg.txt
-          printf "Counts:\n- Unpublished (before): %s\n- Published (before): %s\n- Published (after): %s\n- Unpublished (after, may contain errors): %s\n" \
-            "$unpublished_before" "$published_before" "$published_after" "$unpublished_after" >> /tmp/commit_msg.txt
-
-          BRANCH="${GITHUB_REF#refs/heads/}"
-          git commit -F /tmp/commit_msg.txt
-
-          echo "Created commit:"
-          git --no-pager log -1 --oneline
-
-          echo "Pushing to origin/${BRANCH}..."
-          if git push origin "HEAD:${BRANCH}"; then
-            echo "Push succeeded."
-            echo "commit_made=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "Push failed."
-            echo "commit_made=false" >> "$GITHUB_OUTPUT"
-            exit 1
-          fi
-
-      - name: Create PR from branch -> main and assign to repo owner (when push includes a 'deploy' commit)
+      - name: Create PR from branch -> main (when push includes a 'deploy' commit)
         if: steps.verify.outputs.deploy_found == 'true'
         uses: actions/github-script@v6
         with:
           script: |
-            const fs = require('fs');
-
             const branch = context.ref.replace('refs/heads/','');
-            const title = `Content Update — ${branch}`;
-            const headMessage = context.payload && context.payload.head_commit && context.payload.head_commit.message;
-            const body = headMessage ? headMessage : `Automated PR: changes from ${branch}`;
+            const title = `Functionality Update | Deploy — ${branch}`;
+
+            // Build a compact, plain-text list of commits from the push (SHA7, author, message)
+            let body = `Automated PR: changes from ${branch}\n\n`;
+            try {
+              const event = context.payload;
+              if (event && event.commits && event.commits.length > 0) {
+                body += 'Push commits:\n';
+                for (const c of event.commits) {
+                  const sha7 = (c.id || '').slice(0,7);
+                  const author = (c.author && (c.author.name || c.author.username)) || (c.commit && c.commit.author && c.commit.author.name) || '';
+                  const msg = (c.message || '').replace(/\r?\n/g, ' \\n ');
+                  body += `- ${sha7} ${author}: ${msg}\n`;
+                }
+              } else if (context.payload && context.payload.head_commit) {
+                const hc = context.payload.head_commit;
+                const sha7 = (context.payload.after || '').slice(0,7);
+                const author = (hc.author && (hc.author.name || hc.author.username)) || '';
+                const msg = (hc.message || '').replace(/\r?\n/g, ' \\n ');
+                body += `Head commit: - ${sha7} ${author}: ${msg}\n`;
+              }
+            } catch (err) {
+              // fallback: simple body
+            }
 
             core.info(`Creating PR from ${branch} -> main`);
             let pr;
@@ -174,5 +110,5 @@ jobs:
             } catch (err) {
               core.info(`Could not assign PR #${issue_number} to ${assignee}: ${err.message}`);
               if (err.status === 422) core.info('User may not be assignable (not a collaborator or not allowed by repo settings).');
-              // Don't fail the job for assignment errors; adjust if you want strict behavior.
+              // Do not fail the job on assignment errors
             }
