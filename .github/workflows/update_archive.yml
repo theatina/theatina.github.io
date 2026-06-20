@@ -2,6 +2,7 @@ name: Run update_archive on new unpublished markdown files
 
 permissions:
   contents: write
+  pull-requests: write
 
 on:
   push:
@@ -35,7 +36,7 @@ jobs:
           if [ "$before" = "0000000000000000000000000000000000000000" ]; then
             git ls-tree -r --name-only "$after" \
               | grep -E '^assets/raw/writings/unpublished/[^/]+\.md$' \
-              | sed 's/^/A\\t/' > /tmp/changes.tsv || true
+              | sed 's/^/A\t/' > /tmp/changes.tsv || true
           else
             git --no-pager diff --name-status "$before" "$after" \
               | grep -E '\tassets/raw/writings/unpublished/[^/]+\.md$' > /tmp/changes.tsv || true
