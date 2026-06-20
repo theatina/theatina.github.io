@@ -127,21 +127,22 @@ jobs:
             exit 1
           fi
 
-      - name: Create PR from branch -> main (when push includes a 'deploy' commit)
+      - name: Create PR from branch -> main and assign to repo owner (when push includes a 'deploy' commit)
         if: steps.verify.outputs.deploy_found == 'true'
         uses: actions/github-script@v6
         with:
           script: |
+            const fs = require('fs');
+
             const branch = context.ref.replace('refs/heads/','');
             const title = `Content Update — ${branch}`;
-
-            // Use the head commit message as body when available.
             const headMessage = context.payload && context.payload.head_commit && context.payload.head_commit.message;
             const body = headMessage ? headMessage : `Automated PR: changes from ${branch}`;
 
             core.info(`Creating PR from ${branch} -> main`);
+            let pr;
             try {
-              const res = await github.rest.pulls.create({
+              pr = await github.rest.pulls.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 title,
@@ -149,11 +150,29 @@ jobs:
                 base: 'main',
                 body
               });
-              core.info(`Created PR: ${res.data.html_url}`);
+              core.info(`Created PR: ${pr.data.html_url}`);
             } catch (err) {
               core.info(`Failed to create PR: ${err.message}`);
               if (err.status === 422) {
                 core.info('A pull request from this branch to main may already exist.');
               }
               throw err;
+            }
+
+            // Assign to the repository owner by default (override with PR_ASSIGNEE env var if needed)
+            const assignee = process.env.PR_ASSIGNEE || context.repo.owner;
+            const issue_number = pr.data.number;
+
+            try {
+              await github.rest.issues.addAssignees({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number,
+                assignees: [assignee]
+              });
+              core.info(`Assigned PR #${issue_number} to ${assignee}`);
+            } catch (err) {
+              core.info(`Could not assign PR #${issue_number} to ${assignee}: ${err.message}`);
+              if (err.status === 422) core.info('User may not be assignable (not a collaborator or not allowed by repo settings).');
+              // Don't fail the job for assignment errors; adjust if you want strict behavior.
             }
