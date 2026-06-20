@@ -16,6 +16,23 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3. Navigate
     navigateTo(section);
 
+    // --- Safe Hash Routing Check ---
+    const currentHash = window.location.hash;
+
+    if (currentHash === '#archive') {
+        openWritingsModal();
+    } else if (currentHash.startsWith('#post-') && typeof ARCHIVE_DATA !== 'undefined') {
+        const postId = currentHash.replace('#post-', '');
+        const postIndex = ARCHIVE_DATA.findIndex(item => item.id === postId);
+        if (postIndex !== -1) {
+            openWritingsModal();
+            readArticle(postIndex);
+        } else {
+            openWritingsModal(); // Fallback to grid if ID is invalid
+        }
+    }
+
+
     // UI Elements
     const menuToggle = document.getElementById('menu-toggle');
     const overlay = document.getElementById('mobile-nav-overlay');
@@ -181,8 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.key === 'Escape') {
             const modal = document.getElementById('writingsModal');
             if (modal && modal.style.display === 'block') {
-                modal.style.display = 'none';
-                document.body.style.overflow = '';
+                closeWritingsModal(); // Calls the central function to clear the URL!
             }
         }
     });
@@ -450,6 +466,7 @@ function renderWritings() {
 // ==========================================================================
 
 function openWritingsModal() {
+    history.replaceState(null, null, '#archive');
     const modal = document.querySelector('.writings-modal');
     const grid = document.getElementById('writingsGrid');
     const titleHeader = document.querySelector('.writings-modal-content h2');
@@ -515,6 +532,8 @@ function readArticle(index) {
             <button class="reader-back-btn" onclick="openWritingsModal()">← Back to Archive</button>
         </div>
     `;
+
+    history.replaceState(null, null, `#post-${item.id}`);
 }
 
 function resetModalScroll() {
@@ -555,11 +574,20 @@ function parseSimpleMarkdown(text) {
 
 function closeWritingsModal(event) {
     const modal = document.getElementById('writingsModal');
-    if (!event || event.target === modal) {
-        if (modal) modal.style.display = 'none';
-        document.body.style.overflow = '';
-    }
+    
+    // If an event exists, make sure the user is actually clicking the background or the X button
+    if (event && event.target !== modal && !event.target.classList.contains('writings-close')) return;
+
+    if (modal) modal.style.display = 'none';
+    document.body.style.overflow = '';
+
+    // Revert the URL to the active background section and drop the hash cleanly
+    const activeSection = document.querySelector('.section.active')?.id || 'landing';
+    const revertUrl = activeSection === 'landing' ? window.location.pathname : `?section=${activeSection}`;
+    
+    history.replaceState(null, null, revertUrl);
 }
+
 
 function toUpperNoAccents(text) {
     return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
