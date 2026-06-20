@@ -1108,6 +1108,10 @@ html {
         margin: 20% auto;
         padding: 20px;
     }
+    .writings-modal-content h2 {
+        margin-bottom: 15px; 
+        padding-right: 30px; 
+    }
     .writing-card {
         aspect-ratio: auto;
         min-height: 250px;
@@ -1233,8 +1237,12 @@ html {
 /* Mobile Adjustments */
 @media (max-width: 850px) {
     .archive-sort-wrapper {
-        top: 60px;   /* Tighter spacing for mobile */
-        right: 20px; /* Matches your 20px mobile padding */
+        position: relative;  /* Drops it back into the normal layout flow */
+        top: auto;           /* Resets the fixed top position */
+        right: auto;         /* Resets the fixed right position */
+        margin-bottom: 25px; /* Adds breathing room before the cards start */
+        justify-content: flex-start; 
+        width: 100%;
     }
 }
 
