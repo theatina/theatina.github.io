@@ -1,4 +1,4 @@
-name: Run update_archive on new unpublished markdown files
+name: Deploy new unpublished files to main (PR)
 
 permissions:
   contents: write
@@ -26,27 +26,29 @@ jobs:
           node-version: '24'
 
       - name: Verify commit messages start with 'deploy' (case-insensitive)
+        id: verify
         run: |
           event_file="${GITHUB_EVENT_PATH:-/github/workflow/event.json}"
-          # Match 'deploy' at the start of the message, followed by space, punctuation, or end-of-line.
-          # This avoids matching words like 'deploying'.
+          deploy_found=false
+
+          # If event file exists and jq is available, check all commits in the push.
           if [ -f "$event_file" ] && command -v jq >/dev/null 2>&1; then
             if jq -r '.commits[].message' "$event_file" | grep -i -E -q '^deploy([[:space:][:punct:]]|$)'; then
-              echo "Found a commit message starting with 'deploy'."
-            else
-              echo "No commit message starts with 'deploy' (case-insensitive); skipping job."
-              exit 0
+              deploy_found=true
             fi
           else
+            # Fallback: use head_commit.message
             msg="${{ github.event.head_commit.message }}"
-            if [ -z "$msg" ]; then
-              echo "No head commit message found; skipping job."
-              exit 0
+            if [ -n "$msg" ] && printf "%s" "$msg" | grep -i -E -q '^deploy([[:space:][:punct:]]|$)'; then
+              deploy_found=true
             fi
-            if ! printf "%s" "$msg" | grep -i -E -q '^deploy([[:space:][:punct:]]|$)'; then
-              echo "Head commit message does not start with 'deploy' (case-insensitive); skipping job."
-              exit 0
-            fi
+          fi
+
+          echo "deploy_found=$deploy_found" >> "$GITHUB_OUTPUT"
+          if [ "$deploy_found" = "true" ]; then
+            echo "Found commit starting with 'deploy'."
+          else
+            echo "No commit message starting with 'deploy' found in this push."
           fi
 
       - name: Record counts before
@@ -94,6 +96,7 @@ jobs:
 
           if git diff --cached --quiet; then
             echo "No changes to commit."
+            echo "commit_made=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -110,28 +113,47 @@ jobs:
 
           BRANCH="${GITHUB_REF#refs/heads/}"
           git commit -F /tmp/commit_msg.txt
-          git push origin "HEAD:${BRANCH}"
 
-      - name: Create PR from branch -> main (always create) using github-script
-        if: always()
+          echo "Created commit:"
+          git --no-pager log -1 --oneline
+
+          echo "Pushing to origin/${BRANCH}..."
+          if git push origin "HEAD:${BRANCH}"; then
+            echo "Push succeeded."
+            echo "commit_made=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Push failed."
+            echo "commit_made=false" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+
+      - name: Create PR from branch -> main (when push includes a 'deploy' commit)
+        if: steps.verify.outputs.deploy_found == 'true'
         uses: actions/github-script@v6
         with:
           script: |
-            const fs = require('fs');
             const branch = context.ref.replace('refs/heads/','');
             const title = `Content Update — ${branch}`;
-            if (!fs.existsSync('/tmp/commit_msg.txt')) {
-              core.info('/tmp/commit_msg.txt not found — nothing to use as PR body; skipping PR creation.');
-              return;
-            }
-            const body = fs.readFileSync('/tmp/commit_msg.txt','utf8');
+
+            // Use the head commit message as body when available.
+            const headMessage = context.payload && context.payload.head_commit && context.payload.head_commit.message;
+            const body = headMessage ? headMessage : `Automated PR: changes from ${branch}`;
+
             core.info(`Creating PR from ${branch} -> main`);
-            const res = await github.rest.pulls.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title,
-              head: branch,
-              base: 'main',
-              body
-            });
-            core.info(`Created PR: ${res.data.html_url}`);
+            try {
+              const res = await github.rest.pulls.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                head: branch,
+                base: 'main',
+                body
+              });
+              core.info(`Created PR: ${res.data.html_url}`);
+            } catch (err) {
+              core.info(`Failed to create PR: ${err.message}`);
+              if (err.status === 422) {
+                core.info('A pull request from this branch to main may already exist.');
+              }
+              throw err;
+            }
