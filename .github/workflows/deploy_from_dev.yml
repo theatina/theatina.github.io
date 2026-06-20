@@ -1,0 +1,80 @@
+name: Create PR on "deploy" commit
+
+permissions:
+  contents: read
+  pull-requests: write
+
+on:
+  push:
+    branches:
+      - 'dev'
+
+jobs:
+  create-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check commit messages for "deploy"
+        id: check
+        run: |
+          # gather commit messages from the event payload (fallback to head_commit)
+          if [ -f "$GITHUB_EVENT_PATH" ] && command -v jq >/dev/null 2>&1; then
+            msgs=$(jq -r '.commits[].message' "$GITHUB_EVENT_PATH" | tr '\n' '||')
+            head_msg=$(jq -r '.head_commit.message' "$GITHUB_EVENT_PATH" // "")
+            head_author=$(jq -r '.head_commit.author.name' "$GITHUB_EVENT_PATH" // "")
+            head_date=$(jq -r '.head_commit.timestamp' "$GITHUB_EVENT_PATH" // "")
+          else
+            msgs="${{ github.event.head_commit.message }}"
+            head_msg="${{ github.event.head_commit.message }}"
+            head_author="${{ github.event.head_commit.author.name }}"
+            head_date=""
+          fi
+
+          echo "messages=$msgs" >> "$GITHUB_OUTPUT"
+          echo "head_msg=$head_msg" >> "$GITHUB_OUTPUT"
+          echo "head_author=$head_author" >> "$GITHUB_OUTPUT"
+          echo "head_date=$head_date" >> "$GITHUB_OUTPUT"
+
+          if printf "%s" "$msgs" | grep -i -q 'deploy'; then
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "deploy=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create PR (dev -> main)
+        if: steps.check.outputs.deploy == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # ensure jq is available
+          if ! command -v jq >/dev/null 2>&1; then
+            sudo apt-get update -y
+            sudo apt-get install -y jq
+          fi
+
+          OWNER="${GITHUB_REPOSITORY%/*}"
+          REPO="${GITHUB_REPOSITORY#*/}"
+          BRANCH="${GITHUB_REF#refs/heads/}"
+          TITLE="Deploy request — ${BRANCH}"
+
+          # build PR body from the head commit message + metadata
+          BODY="${{ steps.check.outputs.head_msg }}"
+
+          # include author/date when available
+          if [ -n "${{ steps.check.outputs.head_author }}" ]; then
+            BODY="$BODY\n\nAuthor: ${{ steps.check.outputs.head_author }}"
+          fi
+          if [ -n "${{ steps.check.outputs.head_date }}" ]; then
+            BODY="$BODY\nDate: ${{ steps.check.outputs.head_date }}"
+          fi
+
+          payload=$(jq -n --arg title "$TITLE" --arg head "$BRANCH" --arg base "main" --arg body "$BODY" '{title:$title, head:$head, base:$base, body:$body}')
+
+          resp=$(curl -s -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: application/json" -d "$payload" "https://api.github.com/repos/${OWNER}/${REPO}/pulls")
+
+          pr_url=$(echo "$resp" | jq -r .html_url)
+          if [ "$pr_url" = "null" ] || [ -z "$pr_url" ]; then
+            echo "Failed to create PR: $resp"
+            exit 1
+          fi
+
+          echo "Created PR: $pr_url"
