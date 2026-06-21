@@ -1,11 +1,10 @@
 ---
-id: 2359ea22
+id:
 created: 2013-06-15T22:22:00.001Z
 updated: 2013-06-15T22:22:00.001Z
 category: General
 tags: []
 ---
-# I had a dream
 
 I saw a  **man**.
 
