@@ -45,8 +45,6 @@ jobs:
             exit 0
           fi
           
-          echo "Found commit starting with 'deploy'. Proceeding."
-          
       - name: Create PR from branch -> main (when push includes a 'deploy' commit)
         if: steps.verify.outputs.deploy_found == 'true'
         uses: actions/github-script@v6
