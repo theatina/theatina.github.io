@@ -27,6 +27,34 @@ jobs:
         with:
           node-version: '24'
 
+      - name: Verify commit messages start with 'publish' (case-insensitive) and exit otherwise
+        id: verify_publish
+        run: |
+          event_file="${GITHUB_EVENT_PATH:-/github/workflow/event.json}"
+          publish_found=false
+
+          if [ -f "$event_file" ] && command -v jq >/dev/null 2>&1; then
+            # Check all commits in the push for a message that starts with 'publish' (case-insensitive)
+            if jq -r '.commits[].message' "$event_file" | grep -i -E -q '^publish([[:space:][:punct:]]|$)'; then
+              publish_found=true
+            fi
+          else
+            # Fallback: use head_commit.message
+            msg="${{ github.event.head_commit.message }}"
+            if [ -n "$msg" ] && printf "%s" "$msg" | grep -i -E -q '^publish([[:space:][:punct:]]|$)'; then
+              publish_found=true
+            fi
+          fi
+
+          echo "publish_found=$publish_found" >> "$GITHUB_OUTPUT"
+
+          if [ "$publish_found" != "true" ]; then
+            echo "No commit starting with 'publish' found in this push; exiting."
+            exit 0
+          fi
+
+          echo "Found commit starting with 'publish'. Proceeding."
+
       - name: Get changed files and statuses (top-level .md only)
         id: changed
         run: |
@@ -45,30 +73,6 @@ jobs:
           echo "Changes written to /tmp/changes.tsv"
           echo "changes=written" >> "$GITHUB_OUTPUT"
 
-      - name: Verify commit messages include 'publish' (case-insensitive)
-        run: |
-          event_file="${GITHUB_EVENT_PATH:-/github/workflow/event.json}"
-          if [ -f "$event_file" ] && command -v jq >/dev/null 2>&1; then
-            if jq -r '.commits[].message' "$event_file" | grep -i -xq 'publish'; then
-              echo "Found 'publish' in commit messages."
-            else
-              echo "No commit message equals 'publish' (case-insensitive); skipping job."
-              exit 0
-            fi
-          else
-            msg="${{ github.event.head_commit.message }}"
-            if [ -z "$msg" ]; then
-              echo "No head commit message found; skipping job."
-              exit 0
-            fi
-            if ! printf "%s" "$msg" | grep -i -xq 'publish'; then
-              echo "Commit message is not exactly 'publish' (case-insensitive); skipping job."
-              exit 0
-            fi
-          fi
-          
-          echo "Found commit starting with 'publish'. Proceeding."
-          
       - name: Require at least one new top-level unpublished .md file
         run: |
           if [ ! -f /tmp/changes.tsv ]; then
