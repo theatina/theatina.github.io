@@ -1,5 +1,5 @@
 ---
-id: a347a963
+id:
 created: 2013-12-08T21:45:00.001Z
 updated: 2013-12-08T21:45:00.001Z
 category: General
