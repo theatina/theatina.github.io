@@ -283,10 +283,13 @@ function formatNavItems() {
         if (section === 'whoami') {
             // Special handling for Whoami: wrap "Who"
             btn.innerHTML = `<span class="first-letter">Who</span>${text.slice(3)}`;
-        } else if (['cv', 'projects', 'research'].includes(section)) {
+        } else if (section === 'cv') {
+            // Explicitly handle CV to wrap the 'C' and preserve the chevron icon
+            btn.innerHTML = `<span class="first-letter">C</span>V <i class="fa fa-chevron-down"></i>`;
+        } else if (['projects', 'research'].includes(section)) {
             // Standard handling for others: wrap first letter
             btn.innerHTML = `<span class="first-letter">${text.charAt(0)}</span>${text.slice(1)}`;
-        }
+        } 
     });
 }
 
