@@ -664,13 +664,14 @@ main section h3,
 .hamburger-inner {
     display: block;
     width: 20px;
-    height: 2px;
-    background-color: var(--accent);
-    border-radius: 5px;
+    height: 1.8px;
+    background-color: rgba(41, 128, 185, 0.5); /* 50% transparent version of your --accent blue */
+    border-radius: 50px; /* Forces perfectly smooth, pill-shaped edges */
     position: relative; /* Needed to position the other two lines */
     top: 50%;         
     margin-top: -1.5px;
-    transition: all 0.3s ease;
+    /* transition: all 0.3s ease; */
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .hamburger-inner::before, 
@@ -678,12 +679,13 @@ main section h3,
     content: " "; /* CRITICAL: This makes the lines appear */
     display: block;
     width: 20px;
-    height: 2px;
-    background-color: var(--accent);
-    border-radius: 5px;
+    height: 1.8px;
+    background-color: rgba(41, 128, 185, 0.5); /* Match the transparency */
+    border-radius: 50px; /* Match the smooth shape */
     position: absolute;
     left: 0;
-    transition: all 0.3s ease;
+    /* transition: all 0.3s ease; */
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Position them above and below the center line */
@@ -737,7 +739,14 @@ main section h3,
     flex-direction: column;
     gap: 15px;
     width: 100%;
+    
+    /* --- NEW SCROLLING RULES --- */
+    max-height: calc(100vh - 120px); /* Prevents the menu from extending off-screen */
+    overflow-y: auto;                /* Enables vertical scrolling */
+    padding-bottom: 20px;            /* Adds a little breathing room at the very bottom */
+    padding-right: 10px;             /* Prevents the scrollbar from hugging the edge too tightly */
 }
+
 .close-nav {
     position: absolute;
     top: 20px;
@@ -902,10 +911,23 @@ html {
     .menu-toggle {
         display: flex;
         position: fixed;
-        top: 20px;
-        right: 20px; /* Moved to top-right */
-        left: auto;  /* Remove left alignment */
+        
+        /* 1. Placement: Attach flush to the right edge, slightly down the screen */
+        top: 20%;      /* Adjust this percentage to move it higher or lower */
+        right: 0;      /* Pin it directly to the edge */
+        left: auto;
         z-index: 1002;
+        
+        /* 2. Bookmark Shape: Rounded on the left, flat on the right */
+        border-radius: 12px 0 0 12px !important; 
+        padding: 18px 12px 18px 16px; 
+        border: 1px solid rgba(41, 128, 185, 0.25) !important;
+        border-right: none !important; /* Removes the border against the screen edge */
+        
+        /* 3. High Transparency & Glass Effect */
+        background: rgba(255, 255, 255, 0.15) !important; /* Highly transparent */
+        backdrop-filter: blur(5px) !important; /* Softly blurs text underneath so it's still readable */
+        box-shadow: -4px 4px 12px rgba(0, 0, 0, 0.05) !important;
     }
 
     /* Ensure icons in mobile menu align with text */
