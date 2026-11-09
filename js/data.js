@@ -54,18 +54,22 @@ const CV_DATA = {
     experience: [
         { 
             role: "AI Solutions Engineer", 
-            company: "Data Intelligence and AI Technology", 
+            company: "Netcompany | Data Intelligence and AI Technology", 
             period: "Oct 2024 – Present", 
             details: [
-                "Design and develop end-to-end AI solutions, focusing on LLM-based pipelines, agentic approaches, and RAG systems.",
+                "Design and develop end-to-end AI solutions, focusing on LLM-based pipelines, multi-agent approaches, and RAG systems.",
                 "Establish technical blueprints and AI evaluation frameworks to ensure measurable organizational value.",
-                "Utilize LangGraph, LangSmith, and Prompt Flow for sophisticated model monitoring and observability.",
+                "Utilize LangGraph, Prompt Flow, LangSmith, Langfuse, Grafana for sophisticated model monitoring and observability.",
                 "Analyze technical patterns to optimize model performance and data-driven insights."
             ],
             projects: [
+                {
+                    name: "Telekom GR",
+                    info: "<b>Telecommunications</b> agentic AI for engineering and operations: an SRE agent for automated incident investigation and root-cause analysis, an AI-driven SDLC proof of concept, and AI-enabled delivery capabilities for the enterprise work management platform."
+                },
                 { 
                     name: "NOMOS AI", 
-                    info: "<b>Legal</b> Tech solution automating requirement analysis and documentation processing using RAG architectures." 
+                    info: "<b>Legal</b> Tech AI assistant for Greek law: RAG-based legal research over legislation and case law with cited answers, agentic legal drafting, and document analysis, summarization, and translation." 
                 },
                 { 
                     name: "COSMOTE", 
@@ -83,7 +87,7 @@ const CV_DATA = {
         },
         { 
             role: "IT Business Analyst", 
-            company: "Software & Product Development", 
+            company: "Netcompany | Software & Product Development", 
             period: "Dec 2022 – Sep 2024", 
             details: [
                 "Gathered and documented functional requirements using BDD / Gherkin methodologies for high-profile international clients.",
@@ -96,23 +100,19 @@ const CV_DATA = {
                     name: "OTE", 
                     info: "<b>Telecommunications</b> project focused on requirements analysis and solution design for a large-scale network management system." 
                 },
-                { 
-                    name: "INTERSALONICA", 
-                    info: "" 
+                {
+                    name: "Intersalonica AI Assistant",
+                    info: "<b>Insurance</b> sector assistant built on a multi-agent RAG architecture, combining hybrid BM25/FAISS search, transformer reranking and table-aware document parsing for accurate answers over insurance documentation."
                 },
-                { 
-                    name: "Philip Morris International", 
-                    info: "" 
-                },
-                { 
-                    name: "Vodafone", 
-                    info: "" 
-                },
+                {
+                    name: "MyPlanner Desk Booking System",
+                    info: "<b>Workplace Management</b> desk reservation platform, with business analysis covering requirements, product specifications, use cases and functional documentation."
+                }
             ]
         },
         { 
             role: "Researcher", 
-            company: "Academic Research (NKUA)", 
+            company: "National and Kapodistrian University of Athens (NKUA)", 
             period: "Oct 2021 – Feb 2022", 
             details: [
                 "Evaluated international accessibility compliance for university digital resources.",
@@ -121,7 +121,7 @@ const CV_DATA = {
         },
         { 
             role: "Data Scientist / Research Intern", 
-            company: "Athena Research Center", 
+            company: "Athena Research Center (Athena RC)", 
             period: "Jul 2019 – Jan 2021", 
             details: [
                 "Developed Music Information Retrieval (MIR) algorithms and fine-tuned Deep Learning models.",

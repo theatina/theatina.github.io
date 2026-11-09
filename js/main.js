@@ -387,14 +387,40 @@ function renderMasterCv() {
 }
 
 function renderExperience(id) {
-    document.getElementById(id).innerHTML = "<h3>Professional Experience</h3>" + CV_DATA.experience.map(exp => `
+    document.getElementById(id).innerHTML = "<h3>Professional Experience</h3>" + CV_DATA.experience.map(exp => {
+        
+        // Handle the projects dropdown logic separately
+        const projectsHtml = exp.projects ? `<div class="project-dropdown-list"><p class="project-list-label">Project Case Studies</p>` + 
+            exp.projects.map(p => {
+                const hasInfo = p.info && p.info.trim() !== "";
+                
+                if (hasInfo) {
+                    // Normal expandable project
+                    return `<div class="project-accordion" onclick="event.stopPropagation(); this.classList.toggle('open')">
+                        <div class="project-acc-header"><span>${p.name}</span><i class="fa fa-chevron-down"></i></div>
+                        <div class="project-acc-body"><p>${p.info}</p></div>
+                    </div>`;
+                } else {
+                    // Empty project: block expansion, hide chevron, stop click from closing parent card
+                    return `<div class="project-accordion" onclick="event.stopPropagation();" style="cursor: default;">
+                        <div class="project-acc-header"><span>${p.name}</span></div>
+                    </div>`;
+                }
+            }).join('') + `</div>` : '';
+
+        // Render the main experience card
+        return `
         <div class="cv-item" onclick="if(event.target.closest('.project-accordion')) return; this.classList.toggle('active')">
-            <div class="cv-header"><div><strong>${exp.role}</strong><small>${exp.company} • ${exp.period}</small></div><div class="icon">▼</div></div>
-            <div class="cv-body"><ul class="cv-details-list">${exp.details.map(d => `<li>${d}</li>`).join('')}</ul>
-                ${exp.projects ? `<div class="project-dropdown-list"><p class="project-list-label">Project Case Studies</p>
-                ${exp.projects.map(p => `<div class="project-accordion" onclick="event.stopPropagation(); this.classList.toggle('open')"><div class="project-acc-header"><span>${p.name}</span><i class="fa fa-chevron-down"></i></div><div class="project-acc-body"><p>${p.info}</p></div></div>`).join('')}</div>` : ''}
+            <div class="cv-header">
+                <div><strong>${exp.role}</strong><small>${exp.company} • ${exp.period}</small></div>
+                <div class="icon">▼</div>
             </div>
-        </div>`).join('');
+            <div class="cv-body">
+                <ul class="cv-details-list">${exp.details.map(d => `<li>${d}</li>`).join('')}</ul>
+                ${projectsHtml}
+            </div>
+        </div>`;
+    }).join('');
 }
 
 function renderSkills(id) {
